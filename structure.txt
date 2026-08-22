@@ -1,0 +1,53 @@
+/home/your_user/
+├── .env                                    # এনভায়রনমেন্ট ভেরিয়েবল (পাবলিকের বাইরে)
+│
+├── config/                                 # কনফিগারেশন (পাবলিকের বাইরে)
+│   ├── db.php                              # ডেটাবেস কানেকশন
+│   ├── security.php                        # এনক্রিপশন/ডিক্রিপশন, CSRF
+│   └── functions.php                       # হেল্পার ফাংশন
+│
+└── public_html/                            # ওয়েব রুট
+    ├── .htaccess                           # গ্লোবাল সুরক্ষা
+    ├── index.html                          # ফ্রন্টএন্ড (আপডেটেড)
+    ├── api.php                             # API এন্ডপয়েন্ট (আপডেটেড)
+    ├── config.php                          # কনফিগ লোডার
+    ├── session.php                         # সেশন ম্যানেজমেন্ট
+    │
+    ├── admin/                              # অ্যাডমিন প্যানেল
+    │   ├── .htaccess
+    │   ├── index.html                      # অ্যাডমিন ড্যাশবোর্ড (আপডেটেড)
+    │   ├── login.php
+    │   ├── logout.php
+    │   ├── auth.php
+    │   └── actions/
+    │       ├── save_settings.php
+    │       └── upload_file.php
+    │
+    ├── includes/                           # কোর লাইব্রেরি
+    │   ├── EducationBoardResult.php        # রেজাল্ট স্ক্র্যাপিং ক্লাস
+    │   ├── PdfGenerator.php                # PDF জেনারেটর
+    │   ├── Validator.php                   # ইনপুট ভ্যালিডেশন
+    │   └── RateLimiter.php                 # API রেট লিমিট
+    │
+    ├── storage/                            # সেনসিটিভ ডেটা
+    │   ├── cookies/                        # স্ক্র্যাপারের কুকি
+    │   ├── logs/                           # এরর লগ
+    │   └── .htaccess
+    │
+    ├── assets/
+    │   ├── css/
+    │   │   └── style.min.css
+    │   ├── js/
+    │   │   └── app.min.js
+    │   ├── images/
+    │   │   └── logo.png
+    │   └── uploads/                        # ইউজার আপলোড
+    │       ├── .htaccess
+    │       └── index.html
+    │
+    ├── languages/                          # ট্রান্সলেশন ফাইল
+    │   ├── bn.json
+    │   └── en.json
+    │
+    └── vendor/                             # কম্পোজার প্যাকেজ
+        └── dompdf/

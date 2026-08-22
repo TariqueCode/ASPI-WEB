@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="bn" class="scroll-smooth" x-data="frontendApp()" x-init="init()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title x-text="t('institution_name') + ' | ASPI'">আসহাব সিরাজ পলিটেকনিক ইনস্টিটিউট | ASPI</title>
+    <meta name="theme-color" content="#020617">
+    <link rel="icon" type="image/png" href="assets/images/ASPI-Logo.png">
+    <link rel="apple-touch-icon" href="assets/images/ASPI-Logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { bn: ['var(--dynamic-font)', 'Hind Siliguri', 'sans-serif'] },
+                    colors: { brand: { blue: '#020617', gold: '#facc15', green: '#16a34a', night: '#000000' } },
+                    animation: { 'marquee': 'marquee 30s linear infinite', 'float': 'float 6s ease-in-out infinite', 'gradient': 'gradient 8s ease infinite' },
+                    keyframes: { 
+                        marquee: { '0%': { transform: 'translateX(100vw)' }, '100%': { transform: 'translateX(-100%)' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-15px)' } },
+                        gradient: { '0%, 100%': { backgroundPosition: '0% 50%' }, '50%': { backgroundPosition: '100% 50%' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        :root { --dynamic-font: 'Hind Siliguri'; }
+        body { font-family: var(--dynamic-font), sans-serif; transition: font-size 0.3s ease; }
+        .header-control { color:#ef4444 !important; border:2px solid rgba(239,68,68,.35); background:rgba(255,255,255,.85); }
+        .dark .header-control { color:#ef4444 !important; background:rgba(15,23,42,.8); border-color:rgba(239,68,68,.45); }
+        .founder-highlight { background:linear-gradient(135deg, rgba(30,41,59,.98), rgba(15,23,42,.96)); color:white; }
+        .founder-highlight .founder-cta { background:#ef4444; color:white; box-shadow:0 14px 30px rgba(239,68,68,.28); }
+        .event-media-thumb { height:9rem; object-fit:cover; width:100%; }
+
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
+        .dark .glass-card { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
+        .dark .glass-nav { background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .bg-gradient-anim { position: fixed; inset: 0; z-index: -2; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
+        .dark .bg-gradient-anim { background: linear-gradient(135deg, #050505 0%, #0f172a 100%); }
+        .marquee-container:hover .animate-marquee { animation-play-state: paused; }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        [x-cloak] { display: none !important; }
+        .scroll-reveal { opacity: 0; transform: translateY(40px) scale(0.98); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .scroll-reveal.active { opacity: 1; transform: translateY(0) scale(1); }
+
+        /* ভাষা সুইচার (স্মার্ট) */
+        .lang-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.3s;
+            font-weight: 700;
+            font-size: 0.8rem;
+            backdrop-filter: blur(4px);
+        }
+        .lang-switch:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+        .dark .lang-switch {
+            border-color: rgba(255,255,255,0.1);
+        }
+        .lang-switch i {
+            font-size: 1.1rem;
+            transition: transform 0.3s;
+        }
+        .lang-switch:hover i {
+            transform: rotate(25deg);
+        }
+        .lang-switch .lang-label {
+            opacity: 0.85;
+        }
+
+        /* মোবাইলে ভাষা সুইচার - মেনুর ভিতরে */
+        .mobile-lang-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s;
+            font-weight: 700;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .mobile-lang-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* মোবাইল মেনু */
+        .mobile-menu {
+            background: rgba(15, 23, 42, 0.98) !important;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .dark .mobile-menu {
+            background: rgba(5, 5, 5, 0.98) !important;
+        }
+        .mobile-menu a {
+            color: #f1f5f9;
+        }
+        .mobile-menu a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Apply Now বাটন হাইলাইট */
+        .btn-apply {
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            color: #000;
+            font-weight: 900;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 15px rgba(250, 204, 21, 0.5);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            animation: pulse-gold 2s infinite;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-apply:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(250, 204, 21, 0.7);
+        }
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+        }
+
+        /* ডার্ক মোডে পপআপ ও ড্রপডাউন */
+        .dark .bg-white { background-color: #1e293b !important; }
+        .dark .border-slate-200 { border-color: #475569 !important; }
+        .dark .text-slate-900 { color: #f1f5f9 !important; }
+        .dark .text-slate-700 { color: #cbd5e1 !important; }
+        .dark .text-slate-600 { color: #94a3b8 !important; }
+        .dark select, .dark input, .dark textarea {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+        .dark select option {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+
+        /* ভর্তি ট্যাব */
+        .admission-tab-btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .admission-tab-btn.active {
+            background: #1e293b;
+            color: #fff;
+            border-color: #facc15;
+        }
+        .dark .admission-tab-btn.active {
+            background: #facc15;
+            color: #000;
+        }
+        .admission-tab-btn:not(.active) {
+            background: rgba(0,0,0,0.05);
+            color: #475569;
+        }
+        .dark .admission-tab-btn:not(.active) {
+            background: rgba(255,255,255,0.05);
+            color: #94a3b8;
+        }
+
+        /* গ্যালারি পপআপ */
+        .gallery-popup-overlay {
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(8px);
+        }
+        .gallery-popup-content {
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+        .gallery-popup-content img,
+        .gallery-popup-content iframe {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .gallery-nav-btn {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 9999px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .gallery-nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        .gallery-download-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .gallery-download-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        @media (max-width: 640px) {
+            .gallery-popup-content { max-width: 98vw; }
+            .gallery-nav-btn { padding: 0.4rem 0.6rem; }
+            .mobile-menu a { font-size: 0.9rem; padding: 0.75rem 1rem; }
+        }
+
+        /* গ্যালারি কার্ড স্টাইল */
+        .gallery-card {
+            transition: all 0.3s ease;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        .dark .gallery-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .gallery-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+        .gallery-card img {
+            transition: transform 0.5s ease;
+        }
+        .gallery-card:hover img {
+            transform: scale(1.05);
+        }
+    </style>
+<style x-text="data.site.custom_font ? '@font-face{font-family:ASPI-Custom;src:url(' + assetUrl(data.site.custom_font) + ');font-display:swap;} :root{--dynamic-font:ASPI-Custom;}' : ''"></style>
+
+<style id="aspi-layout-fix">
+/* Preserve the original ASPI desktop breathing room. */
+.container { width: 100%; margin-left: auto; margin-right: auto; }
+@media (min-width: 640px) {
+  .container { max-width: 640px; }
+}
+@media (min-width: 768px) {
+  .container { max-width: 768px; }
+}
+@media (min-width: 1024px) {
+  .container { max-width: 1024px; }
+}
+@media (min-width: 1280px) {
+  .container { max-width: 1280px; }
+}
+@media (min-width: 1536px) {
+  .container { max-width: 1280px; }
+}
+</style>
+
+
+<style id="aspi-v6-main-controls">
+.header-control{background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.05))!important;border:1px solid rgba(148,163,184,.28)!important;box-shadow:0 8px 22px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(12px)}
+.aspi-theme-toggle{width:42px!important;height:42px!important;border-radius:14px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:linear-gradient(135deg,#0f172a,#1e293b)!important;color:#fde68a!important;border:1px solid rgba(250,204,21,.25)!important}
+.aspi-lang-control{min-height:42px!important;padding:0 12px!important;border-radius:14px!important;background:linear-gradient(135deg,rgba(59,130,246,.16),rgba(14,165,233,.08))!important;border:1px solid rgba(96,165,250,.30)!important;display:inline-flex!important;align-items:center!important;gap:8px!important;font-weight:900!important}
+.aspi-admission-info{position:relative;overflow:hidden;border:1px solid rgba(96,165,250,.18);background:radial-gradient(circle at 90% 0%,rgba(250,204,21,.10),transparent 20rem),linear-gradient(145deg,rgba(15,23,42,.98),rgba(17,31,52,.96));box-shadow:0 25px 60px rgba(2,6,23,.20)}
+.aspi-admission-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.30);color:#fde68a;font-weight:900;font-size:.78rem}
+.aspi-info-card{border:1px solid rgba(148,163,184,.14);background:rgba(30,41,59,.56);border-radius:20px;padding:22px;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.aspi-info-card:hover{transform:translateY(-3px);border-color:rgba(250,204,21,.28);box-shadow:0 16px 35px rgba(2,6,23,.20)}
+.aspi-info-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(59,130,246,.15);color:#60a5fa;font-size:1.15rem;margin-bottom:14px}
+.aspi-course-number{width:30px;height:30px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(250,204,21,.12);color:#fde047;font-weight:900;flex:none}
+.aspi-prospectus-card{overflow:hidden;border:1px solid rgba(148,163,184,.16);border-radius:20px;background:rgba(15,23,42,.72)}
+.aspi-prospectus-card img{width:100%;height:260px;object-fit:cover;object-position:top}
+.aspi-contact-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(148,163,184,.13)}.aspi-contact-row:last-child{border-bottom:0}
+@media(max-width:640px){.aspi-prospectus-card img{height:220px}}
+</style>
+
+
+<style id="aspi-v7-main-refinement">
+/* Continuous full-page background: outer breathing room is the same surface. */
+html,body{
+  background:var(--page-bg,#0b1422)!important;
+}
+body.dark, .dark body{
+  background:var(--page-bg-dark,#08111f)!important;
+}
+#app, .min-h-screen, main{
+  background:transparent!important;
+}
+@media(min-width:1024px){
+  body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+    background:inherit;
+  }
+}
+
+/* Larger corner/header logo without making the header bulky. */
+header img[alt*="ASPI"], header img[src*="ASPI-Logo"]{
+  width:62px!important;
+  height:62px!important;
+  min-width:62px!important;
+  object-fit:contain!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.24),0 0 0 2px rgba(250,204,21,.16)!important;
+}
+@media(min-width:1024px){
+  header img[alt*="ASPI"], header img[src*="ASPI-Logo"]{
+    width:76px!important;height:76px!important;min-width:76px!important;border-radius:19px!important;
+  }
+}
+
+/* Gold section separators for top navigation/options. */
+header nav a, header nav button{
+  position:relative;
+}
+header nav a:not(:last-child)::after,
+header nav button:not(:last-child)::after{
+  content:"";
+  position:absolute;
+  top:22%;
+  right:-1px;
+  width:1px;
+  height:56%;
+  background:linear-gradient(to bottom,transparent,#facc15,transparent);
+  opacity:.72;
+}
+header nav a:hover::before,
+header nav button:hover::before{
+  content:"";
+  position:absolute;
+  left:10%;
+  right:10%;
+  bottom:-3px;
+  height:2px;
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,#facc15,transparent);
+}
+
+/* Social media: clicked/active cards retain their brand colour.
+   A small inline script below adds the .is-active state. */
+.aspi-social-link{
+  --brand:#64748b;
+  border:1px solid rgba(148,163,184,.16)!important;
+  transition:transform .2s ease,background .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease!important;
+}
+.aspi-social-link .aspi-social-icon{
+  transition:all .2s ease!important;
+}
+.aspi-social-link:hover,
+.aspi-social-link.is-active{
+  background:color-mix(in srgb,var(--brand) 13%,transparent)!important;
+  border-color:color-mix(in srgb,var(--brand) 60%,transparent)!important;
+  box-shadow:0 10px 28px color-mix(in srgb,var(--brand) 20%,transparent)!important;
+}
+.aspi-social-link:hover .aspi-social-icon,
+.aspi-social-link.is-active .aspi-social-icon{
+  background:var(--brand)!important;
+  color:#fff!important;
+  border-color:var(--brand)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--brand) 13%,transparent)!important;
+}
+.aspi-social-link.is-active{
+  transform:translateY(-2px);
+}
+@supports not (color:color-mix(in srgb, red 10%, transparent)){
+  .aspi-social-link:hover,.aspi-social-link.is-active{background:rgba(59,130,246,.14)!important;border-color:rgba(59,130,246,.5)!important}
+}
+
+/* Founder image: never crop the head. */
+.aspi-founder-portrait{
+  width:150px!important;
+  height:180px!important;
+  object-fit:contain!important;
+  object-position:center top!important;
+  background:#fff!important;
+  padding:6px!important;
+  border-radius:18px!important;
+}
+
+</style>
+</head>
+
+<body class="text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden" :style="`font-size: ${data.site.font_size || 16}px;`">
+
+    <!-- SPLASH SCREEN -->
+    <div x-show="splashVisible" x-transition:leave.duration.800ms class="fixed inset-0 z-[200] flex items-center justify-center bg-gradient-to-b from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900">
+        <div class="text-center px-6">
+            <div class="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-6">
+                <div class="absolute inset-0 border-4 border-brand-gold/30 rounded-full animate-ping"></div>
+                <div class="absolute inset-0 border-4 border-brand-gold/20 rounded-full animate-ping" style="animation-delay: 0.5s;"></div>
+                <img :src="assetUrl(data.site.logo) || 'assets/images/ASPI-Logo.png'" @error="$event.target.src='assets/images/ASPI-Logo.png'" alt="Logo" class="w-full h-full object-contain rounded-full bg-white/10 p-2 border-2 border-brand-gold/50 shadow-xl animate-float">
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-white tracking-widest leading-tight" x-text="t('institution_name')"></h2>
+            <p class="text-sm text-slate-400 mt-3 tracking-wide" x-text="t('established')"></p>
+            <div class="mt-8 flex justify-center">
+                <div class="w-12 h-1 bg-brand-gold/60 rounded-full animate-pulse"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP NOTIFICATION -->
+    <div x-show="popupOpen" class="fixed inset-0 z-[180] flex items-center justify-center px-4" x-cloak>
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="closePopup()"></div>
+        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
+            <button @click="closePopup()" class="absolute top-3 right-3 z-10 text-white bg-black/60 hover:bg-black/80 rounded-full p-2 transition-all">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="relative">
+                <img :src="'../' + currentPopupImage" class="w-full h-auto max-h-[70vh] object-contain">
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    <template x-for="(img, idx) in popupImages" :key="idx">
+                        <button @click="currentPopupIndex = idx" class="w-2 h-2 rounded-full transition-all" :class="idx === currentPopupIndex ? 'bg-white w-4' : 'bg-white/50'"></button>
+                    </template>
+                </div>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-slate-100 dark:bg-slate-800">
+                <span class="text-sm font-bold text-slate-600 dark:text-slate-300" x-text="(currentPopupIndex+1) + '/' + popupImages.length"></span>
+                <div class="flex gap-2">
+                    <button @click="prevPopup()" class="px-4 py-1 bg-brand-blue text-white rounded-lg font-bold hover:bg-blue-700 text-sm" x-text="t('prev')"></button>
+                    <button @click="nextPopup()" class="px-4 py-1 bg-brand-blue text-white rounded-lg font-bold hover:bg-blue-700 text-sm" x-text="t('next')"></button>
+                    <button @click="closePopup()" class="px-4 py-1 bg-slate-300 dark:bg-slate-600 rounded-lg font-bold text-sm" x-text="t('close')"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GALLERY POPUP VIEWER (with attachments) -->
+    <div x-show="galleryPopupOpen" class="fixed inset-0 z-[150] flex items-center justify-center px-4 gallery-popup-overlay" x-cloak>
+        <div class="absolute inset-0" @click="galleryPopupOpen = false"></div>
+        <div class="gallery-popup-content relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden">
+            <button @click="galleryPopupOpen = false" class="absolute top-3 right-3 z-10 text-white bg-black/60 hover:bg-black/80 rounded-full p-2 transition-all">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            <a x-show="currentPopupAttachment" :href="'../' + currentPopupAttachment.file_url" download target="_blank" class="absolute top-3 right-16 z-10 text-white bg-black/60 hover:bg-black/80 rounded-full p-2 transition-all">
+                <i class="fa-solid fa-download text-xl"></i>
+            </a>
+            <div class="absolute top-3 left-3 z-10 text-white bg-black/60 px-3 py-1 rounded-full text-sm font-bold" x-text="(popupIndex+1) + ' / ' + popupAttachments.length"></div>
+            <div class="relative flex items-center justify-center min-h-[50vh] max-h-[80vh] p-4">
+                <template x-if="popupAttachments.length > 0">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <img x-show="currentPopupAttachment.type === 'image'" :src="'../' + currentPopupAttachment.file_url" class="max-h-[70vh] max-w-full object-contain rounded-lg">
+                        <video x-show="currentPopupAttachment.type === 'video'" :src="'../' + currentPopupAttachment.file_url" class="max-h-[70vh] max-w-full rounded-lg" controls></video>
+                        <iframe x-show="currentPopupAttachment.type === 'pdf'" :src="'../' + currentPopupAttachment.file_url" class="w-full h-[70vh] rounded-lg"></iframe>
+                        <p class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-bold bg-black/60 px-4 py-2 rounded-full" x-text="currentPopupAttachment.title || ''"></p>
+                    </div>
+                </template>
+                <template x-if="popupAttachments.length === 0">
+                    <p class="text-slate-400 text-lg font-bold" x-text="t('no_attachments')"></p>
+                </template>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-black/40 backdrop-blur-sm">
+                <button @click="prevPopupAttachment()" class="gallery-nav-btn" x-show="popupAttachments.length > 1"><i class="fa-solid fa-chevron-left"></i> <span x-text="t('prev')"></span></button>
+                <span class="text-sm text-white font-bold" x-text="popupAttachments.length > 0 ? (popupIndex+1) + '/' + popupAttachments.length : '0/0'"></span>
+                <button @click="nextPopupAttachment()" class="gallery-nav-btn" x-show="popupAttachments.length > 1"><span x-text="t('next')"></span> <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gradient-anim"></div>
+
+    <!-- HEADER -->
+    <header class="glass-nav sticky top-0 z-50 w-full transition-all duration-300 shadow-sm">
+        <div class="container mx-auto px-4 py-2 sm:py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-full border-4 border-slate-100 dark:border-slate-800 flex items-center justify-center shadow-lg overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-500">
+                    <img :src="assetUrl(data.site.logo) || 'assets/images/ASPI-Logo.png'" @error="logoFallback($event)" class="w-full h-full object-contain p-1">
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-gray-400 leading-tight" x-text="t('institution_name')"></h1>
+                    <p class="text-[9px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-1 tracking-wide uppercase" x-text="t('established')"></p>
+                </div>
+            </div>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden xl:flex items-center space-x-2 shrink-0">
+                <a href="#about" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('feature')"></a>
+                <a href="#notice_board" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('notice_message')"></a>
+                <a href="#departments" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('departments')"></a>
+                <a href="#admission" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('admission')"></a>
+                <a href="#gallery_section" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('gallery_reports')"></a>
+                <a href="#events_section" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('events_news')"></a>
+                <a href="founder.php" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('founder_profile')"></a>
+                <!-- Dark/Light -->
+                <button @click="toggleTheme()" class="aspi-theme-toggle header-control hover:scale-105 transition-transform" aria-label="Theme">
+                    <i class="fa-solid" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                </button>
+                <!-- Language Switcher (Desktop) -->
+                <div class="lang-switch" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')">
+                    <i class="fa-solid fa-globe"></i>
+                    <span class="lang-label" x-text="currentLang === 'bn' ? 'বাংলা' : 'English'"></span>
+                </div>
+            </nav>
+
+            <!-- Mobile Hamburger -->
+            <div class="xl:hidden flex items-center space-x-2">
+                <button @click="toggleTheme()" class="aspi-theme-toggle header-control" aria-label="Theme">
+                    <i class="fa-solid" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+                </button>
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="w-10 h-10 flex items-center justify-center text-2xl header-control focus:outline-none rounded-full" aria-label="Menu">
+                    <i class="fa-solid" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars-staggered'"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" x-collapse class="xl:hidden absolute top-full left-0 w-full mobile-menu rounded-b-3xl shadow-2xl p-4 flex flex-col space-y-2 z-50">
+            <a href="#about" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('feature')"></a>
+            <a href="#notice_board" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('notice_message')"></a>
+            <a href="#departments" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('departments')"></a>
+            <a href="#admission" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('admission')"></a>
+            <a href="#gallery_section" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('gallery_reports')"></a>
+            <a href="#events_section" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('events_news')"></a>
+            <a href="founder.php" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('founder_profile')"></a>
+            <!-- Mobile Language Switcher -->
+            <button @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn'); mobileMenuOpen = false" class="mobile-lang-btn text-center text-white">
+                <i class="fa-solid fa-globe"></i>
+                <span x-text="currentLang === 'bn' ? 'বাংলা → English' : 'English → বাংলা'"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MARQUEE -->
+    <div class="glass-card border-x-0 border-t-0 flex items-stretch h-12 sm:h-14 overflow-hidden shadow-sm relative z-40 marquee-container bg-gradient-to-r from-slate-900 to-slate-800 dark:from-indigo-900 dark:to-slate-900 text-white">
+        <div class="bg-red-600 dark:bg-brand-gold dark:text-slate-900 font-black px-4 sm:px-8 flex items-center justify-center z-10 whitespace-nowrap shadow-2xl tracking-wider text-xs sm:text-base uppercase">
+            <i class="fa-solid fa-bolt mr-2 animate-pulse text-yellow-300"></i> <span class="hidden sm:inline" x-text="t('flash_update')"></span>
+        </div>
+        <div class="flex-grow flex items-center relative overflow-hidden">
+            <div class="absolute whitespace-nowrap animate-marquee flex space-x-12 sm:space-x-16 font-bold text-xs sm:text-sm" :style="`animation-duration: ${data.site.marquee_speed || 30}s;`">
+                <template x-for="notice in data.notices.filter(n => n.showInMarquee)" :key="'mn-'+notice.id">
+                    <a :href="notice.file_url || '#notice_board'" target="_blank" class="hover:text-yellow-400 dark:hover:text-white flex items-center transition-colors">
+                        <span class="w-2 h-2 rounded-full bg-yellow-400 dark:bg-white mr-2 shadow-[0_0_8px_#facc15]"></span><span x-text="notice.title"></span>
+                    </a>
+                </template>
+                <template x-for="event in data.events.filter(e => e.showInMarquee)" :key="'me-'+event.id">
+                    <a href="#events_section" class="hover:text-green-400 dark:hover:text-white flex items-center transition-colors">
+                        <span class="w-2 h-2 rounded-full bg-green-400 dark:bg-white mr-2 shadow-[0_0_8px_#4ade80]"></span><span x-text="event.title"></span>
+                    </a>
+                </template>
+                <span x-show="data.site.diploma_admission || data.site.nsda_admission" class="flex items-center text-yellow-300 dark:text-white cursor-pointer" @click="openAdmissionModal(data.site.diploma_admission ? 'diploma' : 'nsda')">
+                    <span class="w-2 h-2 rounded-full bg-red-500 mr-2 animate-ping"></span>
+                    <span x-text="data.site.diploma_admission ? t('admission_open_marquee') : data.site.nsda_admission ? t('nsda_admission_notice') : ''"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMISSION MODAL (Two types) -->
+    <div x-show="admissionModal" class="fixed inset-0 z-[100] flex items-center justify-center px-4" x-cloak>
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="admissionModal = false" x-transition.opacity></div>
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl z-10 overflow-hidden transform transition-all max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 flex justify-between items-center text-white sticky top-0 z-10">
+                <h3 class="text-2xl font-black"><i class="fa-solid fa-graduation-cap mr-2 text-yellow-300"></i> 
+                    <span x-text="admissionType === 'diploma' ? t('diploma_form') : t('nsda_form')"></span>
+                </h3>
+                <button @click="admissionModal = false" class="text-white hover:text-red-300 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="p-6">
+                <div class="flex justify-center gap-4 mb-6">
+                    <button @click="admissionType = 'diploma'" class="admission-tab-btn" :class="admissionType === 'diploma' ? 'active' : ''" x-text="t('diploma')"></button>
+                    <button @click="admissionType = 'nsda'" class="admission-tab-btn" :class="admissionType === 'nsda' ? 'active' : ''" x-text="t('nsda')"></button>
+                </div>
+
+                <!-- Diploma Form -->
+                <div x-show="admissionType === 'diploma'">
+                    <div x-show="!diplomaVerified">
+                        <form @submit.prevent="verifyDiplomaResult">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('enter_board')"></label>
+                                    <select x-model="diplomaVerify.board" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none">
+                                        <option value="" x-text="t('select_option')"></option>
+                                        <option value="barisal" x-text="t('board_barisal')"></option>
+                                        <option value="chittagong" x-text="t('board_chittagong')"></option>
+                                        <option value="comilla" x-text="t('board_comilla')"></option>
+                                        <option value="dhaka" x-text="t('board_dhaka')"></option>
+                                        <option value="dinajpur" x-text="t('board_dinajpur')"></option>
+                                        <option value="jessore" x-text="t('board_jessore')"></option>
+                                        <option value="madrasah" x-text="t('board_madrasah')"></option>
+                                        <option value="mymensingh" x-text="t('board_mymensingh')"></option>
+                                        <option value="rajshahi" x-text="t('board_rajshahi')"></option>
+                                        <option value="sylhet" x-text="t('board_sylhet')"></option>
+                                        <option value="tec" x-text="t('board_tec')"></option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('enter_year')"></label>
+                                    <select x-model="diplomaVerify.year" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none">
+                                        <option value="" x-text="t('select_year')"></option>
+                                        <option value="2026" x-text="currentLang === 'bn' ? '২০২৬' : '2026'"></option>
+                                        <option value="2025" x-text="currentLang === 'bn' ? '২০২৫' : '2025'"></option>
+                                        <option value="2024" x-text="currentLang === 'bn' ? '২০২৪' : '2024'"></option>
+                                        <option value="2023" x-text="currentLang === 'bn' ? '২০২৩' : '2023'"></option>
+                                        <option value="2022" x-text="currentLang === 'bn' ? '২০২২' : '2022'"></option>
+                                    </select>
+                                </div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('enter_roll')"></label><input type="text" x-model="diplomaVerify.roll" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"></div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('enter_registration')"></label><input type="text" x-model="diplomaVerify.registration" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"></div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('enter_captcha')"></label>
+                                    <div class="flex items-center gap-3">
+                                        <img :src="captchaUrl" alt="Captcha" class="h-12 border rounded-lg bg-white">
+                                        <button type="button" @click="refreshCaptcha()" class="px-3 py-1 bg-yellow-500 text-slate-900 rounded-lg font-bold text-sm" x-text="t('captcha_refresh')"></button>
+                                    </div>
+                                    <input type="text" x-model="diplomaVerify.captcha" required class="mt-2 w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none" :placeholder="t('enter_captcha_placeholder')">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl shadow-lg transition-all flex justify-center items-center">
+                                <span x-show="!diplomaVerifying" x-text="t('verify_btn')"></span>
+                                <i x-show="diplomaVerifying" class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+                            </button>
+                            <div x-show="diplomaVerifyError" class="mt-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-xl font-bold text-sm" x-text="diplomaVerifyError"></div>
+                        </form>
+                    </div>
+                    <div x-show="diplomaVerified">
+                        <form @submit.prevent="submitDiplomaAdmission">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="col-span-2"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('student_name')"></label><input type="text" x-model="diplomaForm.student_name" readonly class="w-full border-2 border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-2 font-bold"></div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('father_name')"></label><input type="text" x-model="diplomaForm.father_name" readonly class="w-full border-2 border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-2 font-bold"></div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('mother_name')"></label><input type="text" x-model="diplomaForm.mother_name" readonly class="w-full border-2 border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-2 font-bold"></div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('mobile_number')"></label><input type="tel" x-model="diplomaForm.phone" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none" placeholder="01XXX-XXXXXX"></div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('ssc_gpa')"></label><input type="text" x-model="diplomaForm.ssc_gpa" readonly class="w-full border-2 border-slate-200 dark:border-slate-600 bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white rounded-xl px-4 py-2 font-bold"></div>
+                                <div class="col-span-2"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('address_field')"></label><textarea x-model="diplomaForm.address" required rows="2" class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none resize-none"></textarea></div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('course_type')"></label><select x-model="diplomaForm.course_type" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"><option value="diploma" x-text="t('diploma')"></option></select></div>
+                                <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('select_course')"></label><select x-model="diplomaForm.course_name" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"><option value="" x-text="t('select_option')"></option><template x-for="course in data.courses.filter(c => c.type === 'diploma')"><option :value="course.title" x-text="course.title"></option></template></select></div>
+                                <div class="col-span-2"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('photo_upload')"></label><input type="file" accept="image/*" @change="uploadAdmissionPhoto($event, 'diploma')" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-indigo-50 file:text-indigo-600 dark:file:bg-slate-700 dark:file:text-white cursor-pointer"><div x-show="diplomaForm.photo_path" class="mt-2 text-emerald-600 dark:text-emerald-400 text-sm font-bold"><i class="fa-solid fa-check-circle"></i> <span x-text="t('photo_uploaded')"></span></div></div>
+                            </div>
+                            <button type="submit" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl shadow-lg transition-all flex justify-center items-center">
+                                <span x-show="!diplomaSubmitting" x-text="t('submit_btn')"></span>
+                                <i x-show="diplomaSubmitting" class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- NSDA Form -->
+                <div x-show="admissionType === 'nsda'">
+                    <form @submit.prevent="submitNsdaAdmission">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="col-span-2"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('student_name')"></label><input type="text" x-model="nsdaForm.student_name" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"></div>
+                            <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('father_name')"></label><input type="text" x-model="nsdaForm.father_name" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"></div>
+                            <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('mother_name')"></label><input type="text" x-model="nsdaForm.mother_name" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"></div>
+                            <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('mobile_number')"></label><input type="tel" x-model="nsdaForm.phone" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none" placeholder="01XXX-XXXXXX"></div>
+                            <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('age')"></label><input type="number" x-model="nsdaForm.age" required min="1" max="35" class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"></div>
+                            <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('ssc_status')"></label><select x-model="nsdaForm.ssc_status" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"><option value="passed" x-text="t('ssc_passed')"></option><option value="failed" x-text="t('ssc_failed')"></option><option value="not_taken" x-text="t('ssc_not_taken')"></option></select></div>
+                            <div class="col-span-2"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('address_field')"></label><textarea x-model="nsdaForm.address" required rows="2" class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none resize-none"></textarea></div>
+                            <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('course_type')"></label><select x-model="nsdaForm.course_type" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"><option value="nsda">NSDA</option></select></div>
+                            <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('select_course')"></label><select x-model="nsdaForm.course_name" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold focus:border-indigo-500 outline-none"><option value="" x-text="t('select_option')"></option><template x-for="course in data.courses.filter(c => c.type === 'nsda')"><option :value="course.title" x-text="course.title"></option></template></select></div>
+                            <div class="col-span-2"><label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1" x-text="t('photo_upload')"></label><input type="file" accept="image/*" @change="uploadAdmissionPhoto($event, 'nsda')" required class="w-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl px-4 py-2 font-bold file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-indigo-50 file:text-indigo-600 dark:file:bg-slate-700 dark:file:text-white cursor-pointer"><div x-show="nsdaForm.photo_path" class="mt-2 text-emerald-600 dark:text-emerald-400 text-sm font-bold"><i class="fa-solid fa-check-circle"></i> <span x-text="t('photo_uploaded')"></span></div></div>
+                            <div class="col-span-2 text-sm font-bold text-slate-600 dark:text-slate-400"><i class="fa-solid fa-info-circle mr-1"></i> <span x-text="t('fee_info')"></span></div>
+                        </div>
+                        <button type="submit" class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl shadow-lg transition-all flex justify-center items-center">
+                            <span x-show="!nsdaSubmitting" x-text="t('submit_btn')"></span>
+                            <i x-show="nsdaSubmitting" class="fa-solid fa-circle-notch fa-spin text-xl"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="container mx-auto px-4 py-8 sm:py-12 space-y-16 sm:space-y-24">
+        
+        <!-- HERO SECTION -->
+        <section id="about" class="relative min-h-[60vh] flex items-center justify-center rounded-[2rem] sm:rounded-[3rem] overflow-hidden p-6 sm:p-12 glass-card shadow-xl scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center w-full z-10">
+                <div class="space-y-6 sm:space-y-8 text-center lg:text-left">
+                    <div class="inline-flex items-center px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-white dark:bg-white/10 text-slate-800 dark:text-white font-black text-[10px] sm:text-xs shadow-md border border-slate-200 dark:border-white/20 uppercase tracking-widest" x-text="t('bteb_nsda')"></div>
+                    <!-- Hero Title & Founder -->
+                    <h2 class="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tight" x-text="t('hero_title')"></h2>
+                    <a href="founder.php" class="inline-flex items-center gap-2 text-sm sm:text-base text-slate-600 dark:text-slate-400 font-bold italic hover:text-indigo-600 dark:hover:text-brand-gold transition-colors"><span x-text="t('hero_founder')"></span><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+                    <p class="text-sm sm:text-lg text-slate-600 dark:text-slate-300 font-bold max-w-lg mx-auto lg:mx-0 leading-relaxed" x-text="t('hero_subtitle')"></p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                        <button @click="openAdmissionModal('diploma')" x-show="data.site.diploma_admission" class="btn-apply">
+                            <i class="fa-solid fa-rocket"></i> <span x-text="t('apply_now')"></span>
+                        </button>
+                        <span x-show="!data.site.diploma_admission" class="text-red-500 font-bold" x-text="data.site.diploma_admission_notice || t('admission_closed')"></span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="bg-white dark:bg-slate-800/80 p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-slate-100 dark:border-white/5 hover:-translate-y-1.5 transition-all">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 dark:bg-blue-900/50 rounded-xl sm:rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 text-xl sm:text-2xl mb-3 sm:mb-4"><i class="fa-solid fa-gears"></i></div>
+                        <h3 class="text-base sm:text-lg font-black mb-1 sm:mb-2 text-slate-800 dark:text-white" x-text="t('practical_education')"></h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400" x-text="t('practical_desc')"></p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800/80 p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-slate-100 dark:border-white/5 hover:-translate-y-1.5 transition-all">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl sm:rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xl sm:text-2xl mb-3 sm:mb-4"><i class="fa-solid fa-briefcase"></i></div>
+                        <h3 class="text-base sm:text-lg font-black mb-1 sm:mb-2 text-slate-800 dark:text-white" x-text="t('job_opportunity')"></h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400" x-text="t('job_desc')"></p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800/80 p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-slate-100 dark:border-white/5 hover:-translate-y-1.5 transition-all">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-purple-100 dark:bg-purple-900/50 rounded-xl sm:rounded-2xl flex items-center justify-center text-purple-600 dark:text-purple-400 text-xl sm:text-2xl mb-3 sm:mb-4"><i class="fa-solid fa-coins"></i></div>
+                        <h3 class="text-base sm:text-lg font-black mb-1 sm:mb-2 text-slate-800 dark:text-white" x-text="t('low_cost')"></h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400" x-text="t('low_cost_desc')"></p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800/80 p-5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-slate-100 dark:border-white/5 hover:-translate-y-1.5 transition-all">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-yellow-100 dark:bg-yellow-900/50 rounded-xl sm:rounded-2xl flex items-center justify-center text-yellow-600 dark:text-yellow-400 text-xl sm:text-2xl mb-3 sm:mb-4"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <h3 class="text-base sm:text-lg font-black mb-1 sm:mb-2 text-slate-800 dark:text-white" x-text="t('higher_education')"></h3>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400" x-text="t('higher_education_desc')"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- FOUNDER HIGHLIGHT -->
+        <section id="founder_highlight" class="scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="founder-highlight rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 lg:p-12 shadow-2xl overflow-hidden relative">
+                <div class="absolute -right-24 -top-24 w-72 h-72 rounded-full bg-red-500/10 blur-3xl"></div>
+                <div class="relative grid md:grid-cols-[180px_1fr_auto] gap-6 sm:gap-8 items-center">
+                    <div class="w-36 h-36 sm:w-44 sm:h-44 mx-auto rounded-[2rem] overflow-hidden border-4 border-red-500/40 bg-white shadow-2xl">
+                        <img src="assets/images/Sirajul-Islam-Founder.jpg" alt="Founder" class="w-full h-full object-cover" class="aspi-founder-portrait" loading="lazy">
+                    </div>
+                    <div>
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500 text-white text-xs font-black uppercase tracking-wider"><i class="fa-solid fa-user-tie"></i><span x-text="t('founder_profile')"></span></span>
+                        <h2 class="text-2xl sm:text-4xl font-black mt-3" x-text="t('founder_highlight_name')"></h2>
+                        <p class="text-slate-300 mt-3 leading-7 text-sm sm:text-base" x-text="t('founder_highlight_bio')"></p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <a href="founder.php" class="founder-cta inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-black text-sm sm:text-base hover:scale-[1.03] transition"><span x-text="t('founder_read_more')"></span><i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOTICE BOARD -->
+        <section id="notice_board" class="scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 glass-card rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 shadow-xl border-t-8 border-t-indigo-500 dark:border-t-brand-gold h-full flex flex-col overflow-hidden">
+                    <div class="flex flex-wrap justify-between items-center mb-6 sm:mb-8 border-b border-slate-200 dark:border-slate-700 pb-4">
+                        <h3 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white"><i class="fa-solid fa-clipboard-check text-indigo-500 dark:text-brand-gold mr-3"></i> <span x-text="t('notice_board')"></span></h3>
+                        <div class="flex gap-2 flex-wrap">
+                            <button @click="noticeFilter = 'all'" class="px-3 py-1 rounded-full text-xs font-bold transition-all" :class="noticeFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'" x-text="t('all')"></button>
+                            <button @click="noticeFilter = 'diploma'" class="px-3 py-1 rounded-full text-xs font-bold transition-all" :class="noticeFilter === 'diploma' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'" x-text="t('diploma')"></button>
+                            <button @click="noticeFilter = 'nsda'" class="px-3 py-1 rounded-full text-xs font-bold transition-all" :class="noticeFilter === 'nsda' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'" x-text="t('nsda')"></button>
+                            <button @click="noticeFilter = 'general'" class="px-3 py-1 rounded-full text-xs font-bold transition-all" :class="noticeFilter === 'general' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'" x-text="t('general')"></button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar flex-1 max-h-[500px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-indigo-50 dark:bg-slate-800/50 text-indigo-800 dark:text-brand-gold text-xs sm:text-sm uppercase tracking-widest border-b-2 border-indigo-200 dark:border-slate-700">
+                                    <th class="py-3 px-4 font-black whitespace-nowrap" x-text="t('publish_date')"></th>
+                                    <th class="py-3 px-4 font-black" x-text="t('subject_title')"></th>
+                                    <th class="py-3 px-4 font-black text-center whitespace-nowrap" x-text="t('download_header')"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300 divide-y divide-slate-100 dark:divide-slate-800/50">
+                                <template x-if="data.notices.length === 0 || data.notices.filter(n => noticeFilter === 'all' || n.category_id == noticeFilter).length === 0">
+                                    <tr><td colspan="3" class="py-8 text-center text-slate-500" x-text="t('no_items')"></td></tr>
+                                </template>
+                                <template x-for="notice in data.notices.filter(n => noticeFilter === 'all' || n.category_id == noticeFilter)" :key="notice.id">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td class="py-4 px-4 whitespace-nowrap font-bold text-indigo-600 dark:text-indigo-400" x-text="currentLang === 'bn' ? (notice.date_bn || formatDate(notice.date)) : (notice.date_en || formatDate(notice.date))"></td>
+                                        <td class="py-4 px-4 leading-tight">
+                                            <a :href="notice.file_url || '#'" target="_blank" class="hover:text-indigo-600 dark:hover:text-brand-gold transition-colors">
+                                                <span x-text="notice.title"></span>
+                                                <span x-show="notice.isNew" class="ml-2 inline-block px-2 py-0.5 bg-red-500 text-white text-[9px] font-black rounded-full animate-pulse align-middle" x-text="t('new')"></span>
+                                            </a>
+                                        </td>
+                                        <td class="py-4 px-4 text-center">
+                                            <a :href="notice.file_url || '#'" target="_blank" x-show="notice.file_url" class="inline-flex w-10 h-10 rounded-full bg-indigo-50 dark:bg-slate-800 items-center justify-center text-indigo-600 dark:text-brand-gold hover:bg-indigo-600 hover:text-white dark:hover:bg-brand-gold dark:hover:text-slate-900 transition-all shadow-sm">
+                                                <i class="fa-solid fa-file-pdf"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Messages / Quotes -->
+                <div class="lg:col-span-1 flex flex-col gap-6">
+                    <template x-for="(msg, index) in data.messages" :key="index">
+                        <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-white/50 dark:border-white/10 relative overflow-hidden group h-full">
+                            <i class="fa-solid fa-quote-right absolute -top-4 -right-2 text-8xl text-slate-100 dark:text-slate-800/50 z-0 transform group-hover:scale-110 transition-transform duration-500"></i>
+                            <div class="relative z-10 flex flex-col items-center text-center">
+                                <div class="w-28 h-28 rounded-full border-4 border-indigo-100 dark:border-slate-700 shadow-lg overflow-hidden mb-5 bg-slate-200 dark:bg-slate-800">
+                                    <img x-show="msg.image_url" :src="msg.image_url" class="w-full h-full object-cover">
+                                    <i x-show="!msg.image_url" class="fa-solid fa-user-tie text-4xl text-slate-400 dark:text-slate-500 mt-5"></i>
+                                </div>
+                                <h4 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-1" x-text="msg.name"></h4>
+                                <span class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-[10px] sm:text-xs font-black px-3 py-1 rounded-lg mb-5 uppercase tracking-widest" x-text="msg.designation"></span>
+                                <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-semibold italic leading-relaxed" x-text="'“' + msg.message + '”'"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- DEPARTMENTS -->
+        <section id="departments" class="scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="text-center mb-12 sm:mb-16">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-4"><span x-text="t('our_departments')"></span></h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16">
+                <div class="glass-card p-6 sm:p-10 rounded-[2rem] border-t-8 border-t-blue-500 dark:border-t-brand-gold group hover:-translate-y-2 transition-transform">
+                    <div class="flex items-center space-x-4 sm:space-x-5 mb-6 sm:mb-8">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-brand-gold rounded-2xl sm:rounded-3xl flex items-center justify-center text-3xl sm:text-4xl shadow-inner border border-blue-200 dark:border-slate-700 group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-desktop"></i></div>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white leading-tight" x-text="t('cst')"></h3>
+                    </div>
+                    <ul class="space-y-3 sm:space-y-4 text-slate-600 dark:text-slate-300 font-bold text-sm sm:text-lg">
+                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-blue-500 dark:text-brand-gold mt-1 mr-3 text-lg sm:text-xl"></i> <span x-text="t('cst_desc1')"></span></li>
+                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-blue-500 dark:text-brand-gold mt-1 mr-3 text-lg sm:text-xl"></i> <span x-text="t('cst_desc2')"></span></li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 sm:p-10 rounded-[2rem] border-t-8 border-t-yellow-500 dark:border-t-yellow-400 group hover:-translate-y-2 transition-transform">
+                    <div class="flex items-center space-x-4 sm:space-x-5 mb-6 sm:mb-8">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-100 dark:bg-slate-800 text-yellow-600 dark:text-yellow-400 rounded-2xl sm:rounded-3xl flex items-center justify-center text-3xl sm:text-4xl shadow-inner border border-yellow-200 dark:border-slate-700 group-hover:scale-110 transition-transform shrink-0"><i class="fa-solid fa-bolt"></i></div>
+                        <h3 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white leading-tight" x-text="t('et')"></h3>
+                    </div>
+                    <ul class="space-y-3 sm:space-y-4 text-slate-600 dark:text-slate-300 font-bold text-sm sm:text-lg">
+                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-yellow-500 dark:text-yellow-400 mt-1 mr-3 text-lg sm:text-xl"></i> <span x-text="t('et_desc1')"></span></li>
+                        <li class="flex items-start"><i class="fa-solid fa-check-circle text-yellow-500 dark:text-yellow-400 mt-1 mr-3 text-lg sm:text-xl"></i> <span x-text="t('et_desc2')"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMISSION INFO -->
+
+<section id="admission" class="scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="text-center mb-10 sm:mb-12">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-4"><span x-text="t('admission_info')"></span></h2>
+                <div x-show="data.site.diploma_admission_notice" class="mt-4 inline-block px-6 sm:px-8 py-2 sm:py-3 bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-xl sm:rounded-2xl text-blue-800 dark:text-blue-400 font-black text-sm sm:text-lg" x-text="data.site.diploma_admission_notice"></div>
+                <div x-show="data.site.nsda_admission_notice" class="mt-2 inline-block px-6 sm:px-8 py-2 sm:py-3 bg-emerald-100 dark:bg-emerald-900/30 border-2 border-emerald-300 dark:border-emerald-700 rounded-xl sm:rounded-2xl text-emerald-800 dark:text-emerald-400 font-black text-sm sm:text-lg" x-text="data.site.nsda_admission_notice"></div>
+            </div>
+
+            <div class="glass-card rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-12">
+                <div class="flex flex-col md:flex-row gap-6 sm:gap-10">
+                    <!-- Diploma -->
+                    <div class="md:w-1/2 space-y-8">
+                        <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-lg border-t-8 border-indigo-500 h-full flex flex-col justify-between border border-slate-100 dark:border-slate-700">
+                            <div>
+                                <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-6 sm:mb-8 border-b-2 border-slate-100 dark:border-slate-700 pb-3 sm:pb-4" x-text="t('diploma_eligibility')"></h3>
+                                <ul class="space-y-4 sm:space-y-5">
+                                    <li class="flex items-start"><i class="fa-solid fa-check-circle text-indigo-500 mt-1 mr-3 sm:mr-4 text-lg sm:text-xl"></i><span class="text-slate-700 dark:text-slate-300 font-bold text-sm sm:text-lg" x-text="t('diploma_condition')"></span></li>
+                                    <li class="flex items-start p-4 sm:p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl sm:rounded-2xl border-2 border-yellow-200 dark:border-yellow-700/50 mt-4 sm:mt-6"><i class="fa-solid fa-star text-yellow-500 mt-1 mr-3 sm:mr-4 text-xl sm:text-2xl"></i>
+                                        <div>
+                                            <strong class="block text-yellow-700 dark:text-yellow-400 text-lg sm:text-xl font-black mb-1 sm:mb-2" x-text="t('scholarship')"></strong>
+                                            <span class="text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm" x-text="t('scholarship_desc')"></span>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <h4 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-8 sm:mt-10 mb-4 sm:mb-5 border-b border-slate-100 dark:border-slate-700 pb-2" x-text="t('required_docs')"></h4>
+                                <ul class="space-y-2 sm:space-y-3 text-sm sm:text-base font-bold text-slate-600 dark:text-slate-400">
+                                    <li><i class="fa-solid fa-caret-right text-indigo-500 mr-2"></i> <span x-text="t('doc1')"></span></li>
+                                    <li><i class="fa-solid fa-caret-right text-indigo-500 mr-2"></i> <span x-text="t('doc2')"></span></li>
+                                    <li><i class="fa-solid fa-caret-right text-indigo-500 mr-2"></i> <span x-text="t('doc3')"></span></li>
+                                </ul>
+                            </div>
+                            <div class="mt-8 text-center">
+                                <button @click="openAdmissionModal('diploma')" x-show="data.site.diploma_admission" class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-colors w-full">
+                                    <i class="fa-solid fa-file-pen mr-2"></i> <span x-text="t('online_apply')"></span>
+                                </button>
+                                <p x-show="!data.site.diploma_admission" class="text-red-500 font-bold mt-2" x-text="data.site.diploma_admission_notice || t('admission_closed')"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Short Courses -->
+                    <div class="md:w-1/2 space-y-8">
+                        <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] shadow-lg border-t-8 border-emerald-500 h-full flex flex-col justify-between border border-slate-100 dark:border-slate-700">
+                            <div>
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-start mb-6 sm:mb-8 border-b-2 border-slate-100 dark:border-slate-700 pb-4 gap-2">
+                                    <h3 class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mb-0" x-text="t('short_courses')"></h3>
+                                    <span class="bg-emerald-100 dark:bg-emerald-500 text-emerald-800 dark:text-slate-900 text-[10px] sm:text-xs font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg w-fit" x-text="t('short_courses_code')"></span>
+                                </div>
+                                <div class="grid grid-cols-1 gap-3 sm:gap-4 mb-6 sm:mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <template x-for="(course, index) in data.courses.filter(c => c.type === 'nsda')" :key="course.id">
+                                        <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 gap-2">
+                                            <span class="font-bold text-sm sm:text-base flex-1 leading-tight text-slate-800 dark:text-white">
+                                                <span class="text-emerald-500 dark:text-emerald-400 text-lg sm:text-xl mr-2 sm:mr-3 font-black" x-text="String(index+1).padStart(2, '0')"></span><span x-text="course.title"></span>
+                                            </span>
+                                            <span class="text-[10px] sm:text-xs bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-black shrink-0 whitespace-nowrap" x-text="course.level"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                                <h4 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-8 sm:mt-10 mb-4 sm:mb-5 border-b border-slate-100 dark:border-slate-700 pb-2" x-text="t('eligibility_short')"></h4>
+                                <ul class="space-y-2 sm:space-y-3 text-sm sm:text-base font-bold text-slate-600 dark:text-slate-400">
+                                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> <span x-text="t('short_condition1')"></span></li>
+                                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> <span x-text="t('short_condition2')"></span></li>
+                                    <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> <span x-text="t('short_condition3')"></span></li>
+                                </ul>
+                            </div>
+                            <div class="mt-8 text-center">
+                                <button @click="openAdmissionModal('nsda')" x-show="data.site.nsda_admission" class="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-700 transition-colors w-full">
+                                    <i class="fa-solid fa-file-pen mr-2"></i> <span x-text="t('apply_now')"></span>
+                                </button>
+                                <p x-show="!data.site.nsda_admission" class="text-red-500 font-bold mt-2" x-text="data.site.nsda_admission_notice || t('admission_closed')"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GALLERY SECTION -->
+        <section id="gallery_section" class="scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="text-center mb-12 sm:mb-16">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-3" x-text="t('gallery_reports')"></h2>
+                <p class="text-slate-600 dark:text-slate-400 font-bold text-sm sm:text-lg" x-text="t('gallery_sub')"></p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <template x-for="item in galleryItems" :key="item.id">
+                    <div @click="openGalleryPopup(item)" class="gallery-card cursor-pointer border border-slate-200 dark:border-slate-700">
+                        <div class="relative h-52 bg-slate-200 dark:bg-slate-700">
+                            <img :src="'../' + item.thumbnail" class="w-full h-full object-cover" x-show="item.thumbnail">
+                            <div x-show="!item.thumbnail" class="w-full h-full flex items-center justify-center text-slate-400"><i class="fa-solid fa-image text-4xl"></i></div>
+                            <div class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full" x-text="item.attachments_count + ' ' + t('attachments')"></div>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg text-slate-800 dark:text-white line-clamp-2" x-text="item.title"></h3>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="galleryItems.length === 0">
+                    <div class="col-span-full text-center text-slate-500 py-10 font-bold" x-text="t('no_gallery_items')"></div>
+                </template>
+            </div>
+        </section>
+
+        <!-- EVENTS & NEWS -->
+        <section id="events_section" class="scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="text-center mb-12 sm:mb-16">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-3" x-text="t('events_news')"></h2>
+                <p class="text-slate-600 dark:text-slate-400 font-bold text-sm sm:text-lg" x-text="t('events_sub')"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Events -->
+                <div>
+                    <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-4 border-b-2 border-slate-200 dark:border-slate-700 pb-2"><span x-text="t('events')"></span></h3>
+                    <div class="space-y-4">
+                        <template x-for="event in data.events" :key="event.id">
+                            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden border border-slate-200 dark:border-slate-700">
+                                <div class="flex flex-col sm:flex-row">
+                                    <template x-if="event.media && event.media.length"><div class="w-full sm:w-32 h-32 bg-slate-900 overflow-hidden"><img x-show="event.media[0].type==='image'" :src="assetUrl(event.media[0].file_url)" class="w-full h-full object-cover"><video x-show="event.media[0].type==='video'" :src="assetUrl(event.media[0].file_url)" class="w-full h-full object-cover" muted></video></div></template><template x-if="(!event.media || !event.media.length) && event.file_url"><img :src="assetUrl(event.file_url)" class="w-full sm:w-32 h-32 object-cover"></template>
+                                    <div class="p-4 flex-1">
+                                        <h4 class="font-bold text-slate-800 dark:text-white" x-text="event.title"></h4>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="event.date"></p>
+                                        <p class="text-sm text-slate-600 dark:text-slate-300 mt-2 line-clamp-2" x-text="event.description"></p>
+                                        <button @click="openEventPopup(event)" class="mt-2 text-brand-blue dark:text-brand-gold text-sm font-bold hover:underline" x-text="t('read_more')"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="data.events.length === 0">
+                            <div class="text-center text-slate-500 py-6 font-bold" x-text="t('no_events')"></div>
+                        </template>
+                    </div>
+                </div>
+                <!-- News -->
+                <div>
+                    <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-4 border-b-2 border-slate-200 dark:border-slate-700 pb-2"><span x-text="t('news')"></span></h3>
+                    <div class="space-y-4">
+                        <template x-for="item in data.news" :key="item.id">
+                            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden border border-slate-200 dark:border-slate-700">
+                                <div class="flex flex-col sm:flex-row">
+                                    <template x-if="item.media && item.media.length"><div class="w-full sm:w-32 h-32 bg-slate-900 overflow-hidden"><img x-show="item.media[0].type==='image'" :src="assetUrl(item.media[0].file_url)" class="w-full h-full object-cover"><video x-show="item.media[0].type==='video'" :src="assetUrl(item.media[0].file_url)" class="w-full h-full object-cover" muted></video></div></template><template x-if="(!item.media || !item.media.length) && item.file_url"><img :src="assetUrl(item.file_url)" class="w-full sm:w-32 h-32 object-cover"></template>
+                                    <div class="p-4 flex-1">
+                                        <h4 class="font-bold text-slate-800 dark:text-white" x-text="item.title_bn || item.title_en"></h4>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="item.date"></p>
+                                        <div class="text-sm text-slate-600 dark:text-slate-300 mt-2 line-clamp-2" x-html="item.content"></div>
+                                        <button @click="openEventPopup(item)" class="mt-2 text-brand-blue dark:text-brand-gold text-sm font-bold hover:underline" x-text="t('read_more')"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="data.news.length === 0">
+                            <div class="text-center text-slate-500 py-6 font-bold" x-text="t('no_news')"></div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EVENT/NEWS POPUP -->
+        <div x-show="eventPopupOpen" class="fixed inset-0 z-[150] flex items-center justify-center px-4 gallery-popup-overlay" x-cloak>
+            <div class="absolute inset-0" @click="eventPopupOpen = false"></div>
+            <div class="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] p-6 relative">
+                <button @click="eventPopupOpen = false" class="absolute top-4 right-4 text-white bg-black/60 hover:bg-black/80 rounded-full p-2 z-10 transition-all"><i class="fa-solid fa-xmark text-2xl"></i></button>
+                <div x-show="currentEventMedia.length" class="relative mb-4 rounded-xl overflow-hidden bg-black">
+                    <template x-if="currentEventMedia.length">
+                        <div class="relative">
+                            <img x-show="currentEventMedia[eventMediaIndex].type==='image'" :src="assetUrl(currentEventMedia[eventMediaIndex].file_url)" class="w-full max-h-[28rem] object-contain">
+                            <video x-show="currentEventMedia[eventMediaIndex].type==='video'" :src="assetUrl(currentEventMedia[eventMediaIndex].file_url)" class="w-full max-h-[28rem] object-contain" controls></video>
+                            <button x-show="currentEventMedia.length>1" @click="prevEventMedia()" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 text-white"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button x-show="currentEventMedia.length>1" @click="nextEventMedia()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 text-white"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </template>
+                </div>
+                <img x-show="!currentEventMedia.length && currentEvent.file_url" :src="assetUrl(currentEvent.file_url)" class="w-full h-64 object-cover rounded-lg mb-4">
+                <h2 class="text-2xl font-black text-slate-800 dark:text-white" x-text="currentEvent.title"></h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" x-text="currentEvent.date"></p>
+                <div class="mt-4 prose prose-slate dark:prose-invert max-w-none" x-html="currentEvent.content"></div>
+            </div>
+        </div>
+
+        <!-- TEACHERS -->
+        <section id="teachers" class="scroll-reveal" x-intersect="$el.classList.add('active')">
+            <div class="text-center mb-12 sm:mb-16">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-4"><span x-text="t('teachers')"></span></h2>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-h-[600px] overflow-y-auto pr-2 pb-4 custom-scrollbar">
+                <template x-for="(teacher, index) in data.teachers" :key="teacher.id">
+                    <div class="glass-card rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 text-center hover:-translate-y-2 sm:hover:-translate-y-3 hover:shadow-2xl transition-all duration-500 group border border-white/50 dark:border-slate-700" :style="`transition-delay: ${index * 0.1}s`">
+                        <div class="w-28 h-28 sm:w-32 sm:h-32 mx-auto rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-slate-700 dark:to-slate-800 p-1.5 mb-4 sm:mb-5 shadow-inner border border-indigo-200 dark:border-slate-600 group-hover:border-indigo-500 transition-colors">
+                            <div class="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden shadow-md">
+                                <template x-if="teacher.file_url"><img :src="teacher.file_url" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"></template>
+                                <template x-if="!teacher.file_url"><i class="fa-solid fa-user-tie text-3xl sm:text-4xl text-slate-300 dark:text-slate-600 group-hover:scale-110 transition-transform duration-500"></i></template>
+                            </div>
+                        </div>
+                        <h4 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mb-1 leading-tight" x-text="teacher.name"></h4>
+                        <p class="text-indigo-600 dark:text-yellow-400 font-bold text-xs sm:text-sm mb-2 uppercase tracking-wider" x-text="teacher.deg"></p>
+                        <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-300 bg-slate-100 dark:bg-slate-800 py-1.5 px-3 rounded-lg inline-block font-semibold border border-slate-200 dark:border-slate-700 shadow-sm" x-text="teacher.dept"></p>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-20 glass-card border-x-0 border-b-0 rounded-t-[3rem] sm:rounded-t-[4rem] pt-16 sm:pt-20 pb-8 relative overflow-hidden">
+        <div class="absolute bottom-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-brand-gold/10 rounded-full blur-3xl -z-10"></div>
+        <div class="absolute top-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-indigo-500/10 rounded-full blur-3xl -z-10"></div>
+        
+        <div class="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
+            <div>
+                <div class="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-lg overflow-hidden"><img :src="assetUrl(data.site.logo) || 'assets/images/ASPI-Logo.png'" @error="logoFallback($event)" class="w-full h-full object-contain p-1"></div>
+                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-none" x-text="t('institution_name_short')"></h3>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold mb-6 sm:mb-8 leading-relaxed" x-text="t('footer_desc')"></p>
+                <div class="flex space-x-3 sm:space-x-4">
+                    <template x-for="link in socialLinks" :key="link.id">
+                        <a :href="link.url" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all shadow-md hover:scale-110 text-lg sm:text-xl border border-slate-100 dark:border-slate-700" :style="`background-color: ${link.color}20; color: ${link.color};`">
+                            <i :class="link.icon_class || 'fa-solid fa-link'"></i>
+                        </a>
+                    </template>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-700 pb-2 inline-block" x-text="t('courses')"></h4>
+                <ul class="space-y-3 sm:space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
+                    <template x-for="course in data.courses" :key="course.id">
+                        <li class="flex items-start"><i class="fa-solid fa-angle-right text-indigo-500 dark:text-brand-gold mt-0.5 sm:mt-1 mr-2 sm:mr-3 text-sm sm:text-lg"></i> <span x-text="course.title"></span></li>
+                    </template>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-700 pb-2 inline-block" x-text="t('useful_links')"></h4>
+                <ul class="space-y-3 sm:space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
+                    <li><a href="https://bteb.gov.bd/" target="_blank" class="hover:text-indigo-600 dark:hover:text-brand-gold flex items-center"><i class="fa-solid fa-link text-indigo-500 dark:text-brand-gold mr-2 sm:mr-3"></i> <span x-text="t('bteb')"></span></a></li>
+                    <li><a href="https://nsda.gov.bd/" target="_blank" class="hover:text-indigo-600 dark:hover:text-brand-gold flex items-center"><i class="fa-solid fa-link text-indigo-500 dark:text-brand-gold mr-2 sm:mr-3"></i> <span x-text="t('nsda_link')"></span></a></li>
+                    <li><a href="#admission" class="hover:text-indigo-600 dark:hover:text-brand-gold flex items-center"><i class="fa-solid fa-link text-indigo-500 dark:text-brand-gold mr-2 sm:mr-3"></i> <span x-text="t('online_apply')"></span></a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-700 pb-2 inline-block" x-text="t('address_label')"></h4>
+                <ul class="space-y-4 sm:space-y-5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold">
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-location-dot mt-0.5 sm:mt-1 text-indigo-500 dark:text-brand-gold mr-3 sm:mr-4 text-lg sm:text-xl"></i>
+                        <span x-text="t('institution_address')"></span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fa-solid fa-phone text-indigo-500 dark:text-brand-gold mr-3 sm:mr-4 text-lg sm:text-xl"></i>
+                        <span x-text="t('institution_phone')"></span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fa-solid fa-envelope text-indigo-500 dark:text-brand-gold mr-3 sm:mr-4 text-lg sm:text-xl"></i>
+                        <span x-text="t('institution_email')"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="text-center text-xs sm:text-sm font-black text-slate-500 dark:text-slate-400 mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-slate-200/50 dark:border-slate-800">
+            <p x-text="t('copyright')"></p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('frontendApp', () => ({
+                // ======================== STATE ========================
+                darkMode: false,
+                mobileMenuOpen: false,
+                splashVisible: true,
+                currentLang: 'bn',
+                translations: {},
+
+                // Admission
+                admissionModal: false,
+                admissionType: 'diploma',
+
+                // Diploma
+                diplomaVerified: false,
+                diplomaVerifying: false,
+                diplomaVerifyError: '',
+                diplomaSubmitting: false,
+                diplomaVerify: { board: '', year: '', roll: '', registration: '', captcha: '' },
+                diplomaForm: { 
+                    student_name: '', father_name: '', mother_name: '', 
+                    phone: '', address: '', ssc_gpa: '', 
+                    course_type: 'diploma', course_name: '', 
+                    photo_path: '', board: '', roll: '', registration: '' 
+                },
+
+                // NSDA
+                nsdaSubmitting: false,
+                nsdaForm: {
+                    student_name: '', father_name: '', mother_name: '',
+                    phone: '', address: '', age: '', ssc_status: 'passed',
+                    course_type: 'nsda', course_name: '', photo_path: ''
+                },
+
+                // Captcha
+                captchaUrl: 'api.php?action=get_captcha&t=' + Date.now(),
+
+                // Data
+                data: {
+                    site: {
+                        font_size: '16', custom_font: '', logo: '', phone: '', email: '',
+                        address: '', address_en: '',
+                        master_admission: true, diploma_admission: true, nsda_admission: true,
+                        marquee_speed: 30, popup_animation_delay: 3000,
+                        popup_enabled: false, popup_images: []
+                    },
+                    scraper: { eligibility: {} },
+                    messages: [], notices: [], events: [], news: [], teachers: [], courses: [], admissions: []
+                },
+
+                // Gallery
+                galleryItems: [],
+                galleryPopupOpen: false,
+                popupAttachments: [],
+                popupIndex: 0,
+                currentPopupAttachment: null,
+
+                // Popup notification
+                popupOpen: false,
+                popupImages: [],
+                currentPopupIndex: 0,
+
+                // Event popup
+                eventPopupOpen: false,
+                currentEvent: {},
+                currentEventMedia: [],
+                eventMediaIndex: 0,
+
+                // Notice filter
+                noticeFilter: 'all',
+
+                // Social links
+                socialLinks: [],
+
+                // ======================== TRANSLATION ========================
+                t(key) { return this.translations[key] || key; },
+                assetUrl(path) {
+                    if (!path) return '';
+                    if (/^(https?:)?\/\//i.test(path) || path.startsWith('/')) return path;
+                    return path.replace(/^\.\//, '');
+                },
+                logoFallback(event) { event.target.src = 'assets/images/ASPI-Logo.png'; },
+
+                async loadTranslations(lang) {
+                    try {
+                        const res = await fetch(`/languages/${lang}.json?t=${Date.now()}`);
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        this.translations = await res.json();
+                    } catch (e) {
+                        console.warn('Translation fallback', e);
+                        this.translations = {};
+                    }
+                },
+
+                // ======================== INIT ========================
+                init() {
+                    // Theme
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    const savedTheme = localStorage.getItem('aspi_theme');
+                    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                        this.darkMode = true;
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        this.darkMode = false;
+                        document.documentElement.classList.remove('dark');
+                    }
+
+                    // Language
+                    const savedLang = localStorage.getItem('aspi_lang') || 'bn';
+                    this.currentLang = ['bn','en'].includes(savedLang) ? savedLang : (navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'bn');
+                    this.loadTranslations(this.currentLang);
+                     document.documentElement.lang = this.currentLang;
+
+                    // Fetch data
+                    this.fetchData();
+                    this.fetchGallery();
+                    this.fetchSocialLinks();
+
+                    // Splash screen and popup
+                    setTimeout(() => {
+                        this.splashVisible = false;
+                        if (this.data.site.popup_enabled && this.popupImages.length > 0) {
+                            this.popupOpen = true;
+                        }
+                    }, 2800);
+
+                    // Auto-refresh
+                    setInterval(() => {
+                        this.fetchData();
+                        this.fetchGallery();
+                        this.fetchSocialLinks();
+                    }, 300000);
+                },
+
+                toggleTheme() {
+                    this.darkMode = !this.darkMode;
+                    document.documentElement.classList.toggle('dark', this.darkMode);
+                    localStorage.setItem('aspi_theme', this.darkMode ? 'dark' : 'light');
+                },
+
+                switchLanguage(lang) {
+                    if (lang === this.currentLang) return;
+                    this.currentLang = lang;
+                    localStorage.setItem('aspi_lang', lang);
+                    this.loadTranslations(lang);
+                    this.fetchData();
+                    this.fetchGallery();
+                    this.fetchSocialLinks();
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    try {
+                        const d = new Date(dateStr);
+                        if (!isNaN(d)) {
+                            return d.toLocaleDateString(this.currentLang === 'en' ? 'en-US' : 'bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+                        }
+                    } catch(e) {}
+                    return dateStr;
+                },
+
+                // ======================== DATA FETCHING ========================
+                async fetchData() {
+                    try {
+                        const lang = this.currentLang || 'bn';
+                        const res = await fetch(`api.php?lang=${lang}&t=${Date.now()}`, { cache: 'no-store' });
+                        const json = await res.json();
+                        if (!json.error) {
+                            this.data = json;
+                            document.documentElement.lang = this.currentLang;
+                            if (this.data.site.popup_images) {
+                                this.popupImages = typeof this.data.site.popup_images === 'string' ? JSON.parse(this.data.site.popup_images) : this.data.site.popup_images;
+                            }
+                            if (!this.data.site.marquee_speed) this.data.site.marquee_speed = 30;
+                            if (!this.data.site.font_size) this.data.site.font_size = 16;
+                        }
+                    } catch (e) { console.error('Data load error', e); }
+                },
+
+                async fetchGallery() {
+                    try {
+                        const res = await fetch(`api.php?action=get_gallery_items&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.gallery) this.galleryItems = json.gallery;
+                    } catch (e) { console.error('Gallery load error', e); }
+                },
+
+                async fetchSocialLinks() {
+                    try {
+                        const res = await fetch('api.php?action=get_social_links&t=' + Date.now());
+                        const json = await res.json();
+                        if (json.social_links) this.socialLinks = json.social_links;
+                    } catch (e) { console.error('Social links load error', e); }
+                },
+
+                // ======================== GALLERY POPUP ========================
+                async openGalleryPopup(item) {
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch(`api.php?action=get_gallery_attachments&id=${item.id}&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.attachments) {
+                            this.popupAttachments = json.attachments;
+                            this.popupIndex = 0;
+                            if (this.popupAttachments.length > 0) {
+                                this.currentPopupAttachment = this.popupAttachments[0];
+                                this.galleryPopupOpen = true;
+                            }
+                        }
+                    } catch (e) { console.error(e); }
+                    this.isLoading = false;
+                },
+
+                nextPopupAttachment() {
+                    if (this.popupAttachments.length === 0) return;
+                    this.popupIndex = (this.popupIndex + 1) % this.popupAttachments.length;
+                    this.currentPopupAttachment = this.popupAttachments[this.popupIndex];
+                },
+
+                prevPopupAttachment() {
+                    if (this.popupAttachments.length === 0) return;
+                    this.popupIndex = (this.popupIndex - 1 + this.popupAttachments.length) % this.popupAttachments.length;
+                    this.currentPopupAttachment = this.popupAttachments[this.popupIndex];
+                },
+
+                // ======================== POPUP NOTIFICATION ========================
+                closePopup() {
+                    this.popupOpen = false;
+                },
+
+                nextPopup() {
+                    if (this.popupImages.length === 0) return;
+                    this.currentPopupIndex = (this.currentPopupIndex + 1) % this.popupImages.length;
+                },
+
+                prevPopup() {
+                    if (this.popupImages.length === 0) return;
+                    this.currentPopupIndex = (this.currentPopupIndex - 1 + this.popupImages.length) % this.popupImages.length;
+                },
+
+                get currentPopupImage() {
+                    if (this.popupImages.length === 0) return '';
+                    return this.popupImages[this.currentPopupIndex] || this.popupImages[0];
+                },
+
+                // ======================== EVENT POPUP ========================
+                openEventPopup(item) {
+                    this.currentEvent = item;
+                    this.currentEventMedia = Array.isArray(item.media) ? item.media : [];
+                    this.eventMediaIndex = 0;
+                    this.eventPopupOpen = true;
+                },
+                nextEventMedia() { if (this.currentEventMedia.length) this.eventMediaIndex = (this.eventMediaIndex + 1) % this.currentEventMedia.length; },
+                prevEventMedia() { if (this.currentEventMedia.length) this.eventMediaIndex = (this.eventMediaIndex - 1 + this.currentEventMedia.length) % this.currentEventMedia.length; },
+
+                // ======================== CAPTCHA ========================
+                refreshCaptcha() {
+                    this.captchaUrl = 'api.php?action=get_captcha&t=' + Date.now();
+                },
+
+                // ======================== ADMISSION ========================
+                openAdmissionModal(type) {
+                    this.admissionType = type;
+                    this.admissionModal = true;
+                    if (type === 'diploma') {
+                        this.diplomaVerified = false;
+                        this.diplomaVerifyError = '';
+                        this.diplomaVerify = { board: '', year: '', roll: '', registration: '', captcha: '' };
+                        this.diplomaForm = { 
+                            student_name: '', father_name: '', mother_name: '', 
+                            phone: '', address: '', ssc_gpa: '', 
+                            course_type: 'diploma', course_name: '', 
+                            photo_path: '', board: '', roll: '', registration: '' 
+                        };
+                    } else {
+                        this.nsdaForm = {
+                            student_name: '', father_name: '', mother_name: '',
+                            phone: '', address: '', age: '', ssc_status: 'passed',
+                            course_type: 'nsda', course_name: '', photo_path: ''
+                        };
+                    }
+                    this.refreshCaptcha();
+                },
+
+                async verifyDiplomaResult() {
+                    this.diplomaVerifying = true;
+                    this.diplomaVerifyError = '';
+                    try {
+                        const res = await fetch(`api.php?action=verify_result&lang=${this.currentLang}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.diplomaVerify)
+                        });
+                        const result = await res.json();
+                        if (result.error) {
+                            this.diplomaVerifyError = result.error;
+                        } else if (result.success) {
+                            const d = result.data;
+                            this.diplomaForm.student_name = d.name || '';
+                            this.diplomaForm.father_name = d.father_name || '';
+                            this.diplomaForm.mother_name = d.mother_name || '';
+                            this.diplomaForm.ssc_gpa = d.gpa || '';
+                            this.diplomaForm.board = d.board || this.diplomaVerify.board;
+                            this.diplomaForm.roll = d.roll || this.diplomaVerify.roll;
+                            this.diplomaForm.registration = d.registration || this.diplomaVerify.registration;
+                            this.diplomaVerified = true;
+                        }
+                    } catch (e) {
+                        this.diplomaVerifyError = this.t('network_error');
+                    }
+                    this.diplomaVerifying = false;
+                },
+
+                async uploadAdmissionPhoto(event, type) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    try {
+                        const res = await fetch(`api.php?action=upload&lang=${this.currentLang}`, { method: 'POST', body: fd });
+                        const result = await res.json();
+                        if (result.url) {
+                            if (type === 'diploma') this.diplomaForm.photo_path = result.url;
+                            else this.nsdaForm.photo_path = result.url;
+                        } else {
+                            alert(this.t('upload_failed'));
+                        }
+                    } catch (e) { alert(this.t('upload_error')); }
+                },
+
+                async submitDiplomaAdmission() {
+                    this.diplomaSubmitting = true;
+                    try {
+                        const res = await fetch(`api.php?action=submit_diploma_admission&lang=${this.currentLang}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.diplomaForm)
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('admission_success_diploma'));
+                            this.admissionModal = false;
+                            this.diplomaVerified = false;
+                            this.diplomaVerify = { board: '', year: '', roll: '', registration: '', captcha: '' };
+                            this.diplomaForm = { 
+                                student_name: '', father_name: '', mother_name: '', 
+                                phone: '', address: '', ssc_gpa: '', 
+                                course_type: 'diploma', course_name: '', 
+                                photo_path: '', board: '', roll: '', registration: '' 
+                            };
+                            this.refreshCaptcha();
+                        } else {
+                            alert(this.t('application_error') + ': ' + (result.error || this.t('unknown_error')));
+                        }
+                    } catch (e) { alert(this.t('connection_check')); }
+                    this.diplomaSubmitting = false;
+                },
+
+                async submitNsdaAdmission() {
+                    this.nsdaSubmitting = true;
+                    try {
+                        const res = await fetch(`api.php?action=submit_nsda_admission&lang=${this.currentLang}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.nsdaForm)
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('admission_success_nsda'));
+                            this.admissionModal = false;
+                            this.nsdaForm = {
+                                student_name: '', father_name: '', mother_name: '',
+                                phone: '', address: '', age: '', ssc_status: 'passed',
+                                course_type: 'nsda', course_name: '', photo_path: ''
+                            };
+                            this.refreshCaptcha();
+                        } else {
+                            alert(this.t('application_error') + ': ' + (result.error || this.t('unknown_error')));
+                        }
+                    } catch (e) { alert(this.t('connection_check')); }
+                    this.nsdaSubmitting = false;
+                }
+            }));
+        });
+    </script>
+
+<script id="aspi-v7-social-active">
+document.addEventListener('DOMContentLoaded', function(){
+  const links = document.querySelectorAll('a[data-aspi-social="1"]');
+  links.forEach(function(link){
+    link.classList.add('aspi-social-link');
+    const icon = link.querySelector('i,svg');
+    if(icon) icon.classList.add('aspi-social-icon');
+    link.addEventListener('click', function(){
+      links.forEach(x => x.classList.remove('is-active'));
+      link.classList.add('is-active');
+    });
+  });
+});
+</script>
+
+</body>
+</html>

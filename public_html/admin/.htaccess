@@ -1,0 +1,16 @@
+Options -Indexes
+
+# Dashboard entry/authentication endpoints.
+<FilesMatch "^(index\.html|login\.php|logout\.php|auth\.php)$">
+    Require all granted
+</FilesMatch>
+
+# Admin action endpoints are called by the dashboard via fetch().
+<FilesMatch "^actions/.*\.php$">
+    Require all granted
+</FilesMatch>
+
+# Deny any other PHP/PHTML file in /admin.
+<FilesMatch "^(?!index\.html$|login\.php$|logout\.php$|auth\.php$|actions/).*\.phtml?$">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,14 @@
+Options -Indexes
+ErrorDocument 404 /404.php
+
+<FilesMatch "\.(env|ini|log|sql|md|yml|yaml|backup)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "^(index\.html|api\.php|config\.php|session\.php|founder\.php|404\.php)$">
+    Require all granted
+</FilesMatch>
+
+<FilesMatch "^(?!index\.html$|api\.php$|config\.php$|session\.php$|founder\.php$|404\.php$).*\.phtml?$">
+    Require all denied
+</FilesMatch>

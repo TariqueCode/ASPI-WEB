@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark" x-data="adminApp()" x-init="init()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASPI Admin Dashboard</title>
+    <link rel="icon" type="image/png" href="../assets/images/ASPI-Logo.png">
+    <link rel="apple-touch-icon" href="../assets/images/ASPI-Logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { 'brand-blue': '#2563eb', 'brand-gold': '#facc15' } } } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #0b1120; color: #e2e8f0; }
+        .dark body { background-color: #0f172a; }
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        ::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.5; cursor: pointer; }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            color: #64748b;
+        }
+        .dark .sidebar-item { color: #94a3b8; }
+        .sidebar-item i { width: 1.5rem; text-align: center; }
+        .sidebar-item span { margin-left: 0.5rem; }
+        .sidebar-item.active {
+            background-color: #1e3a8a;
+            color: white;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+        }
+        .dark .sidebar-item.active {
+            background-color: #facc15;
+            color: #0f172a;
+        }
+        .sidebar-item:not(.active):hover {
+            background-color: #e2e8f0;
+        }
+        .dark .sidebar-item:not(.active):hover {
+            background-color: #1e293b;
+        }
+
+        .dark .bg-white { background-color: #1e293b !important; }
+        .dark .bg-slate-50 { background-color: #0f172a !important; }
+        .dark .border-slate-200 { border-color: #334155 !important; }
+        .dark .border-slate-100 { border-color: #1e293b !important; }
+        .dark .text-slate-700 { color: #cbd5e1 !important; }
+        .dark .text-slate-600 { color: #94a3b8 !important; }
+        .dark .text-slate-500 { color: #64748b !important; }
+        .dark .text-slate-900 { color: #f1f5f9 !important; }
+        .dark .text-slate-800 { color: #f1f5f9 !important; }
+        .dark .bg-slate-100 { background-color: #1e293b !important; }
+        .dark .bg-slate-200 { background-color: #334155 !important; }
+        .dark .bg-slate-300 { background-color: #475569 !important; }
+        .dark input, .dark select, .dark textarea {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+        .dark input::placeholder, .dark textarea::placeholder { color: #64748b !important; }
+        .dark select option { background-color: #1e293b !important; color: #f1f5f9 !important; }
+        .dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.5); }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.6), 0 4px 6px -2px rgba(0,0,0,0.4); }
+        .dark .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7), 0 10px 10px -5px rgba(0,0,0,0.4); }
+
+        .badge-pending { background: #f59e0b; color: #000; }
+        .badge-accepted { background: #22c55e; color: #fff; }
+        .badge-rejected { background: #ef4444; color: #fff; }
+        .badge-completed { background: #3b82f6; color: #fff; }
+
+        .gallery-thumb { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
+        .gallery-thumb:hover { transform: scale(1.03); }
+
+        @media (max-width: 640px) {
+            .table-wrap { overflow-x: auto; display: block; white-space: nowrap; }
+            .table-wrap table { min-width: 600px; }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+
+        .lang-switch-dash {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            padding: 0.3rem 0.7rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.3s;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+        .lang-switch-dash:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+        .dark .lang-switch-dash { border-color: rgba(255,255,255,0.1); }
+        .lang-switch-dash i { font-size: 0.9rem; transition: transform 0.3s; }
+        .lang-switch-dash:hover i { transform: rotate(20deg); }
+
+        .admin-btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:42px; padding:.7rem 1rem; border-radius:.8rem; font-weight:800; line-height:1.15; color:#fff !important; box-shadow:0 8px 18px rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.14); transition:transform .18s ease, filter .18s ease, box-shadow .18s ease; }
+        .admin-btn:hover { transform:translateY(-1px); filter:brightness(1.08); box-shadow:0 12px 24px rgba(0,0,0,.28); }
+        .admin-btn-primary { background:#2563eb !important; }
+        .admin-btn-success { background:#16a34a !important; }
+        .admin-btn-danger { background:#dc2626 !important; }
+        .admin-btn-warning { background:#f59e0b !important; color:#111827 !important; }
+        .admin-btn-info { background:#0891b2 !important; }
+        .admin-btn-muted { background:#334155 !important; color:#f8fafc !important; }
+        .floating-save { background:#facc15 !important; color:#111827 !important; border:2px solid #fde68a !important; min-height:48px; }
+        .floating-save:disabled { opacity:.55; }
+        .admin-icon-btn { color:#f87171 !important; }
+        @media (max-width:640px){ .admin-btn{width:100%;} .admin-btn.inline-auto{width:auto;} }
+    </style>
+
+
+
+<style id="aspi-v9-dashboard-system">
+:root{--d-bg:#0b1422;--d-sidebar:#0f1c2e;--d-card:#17263a;--d-card2:#1b2d43;--d-input:#0b1728;--d-line:#2b4058;--d-text:#f8fafc;--d-muted:#9aaac0;--d-gold:#facc15;--d-blue:#3b82f6;--d-green:#22c55e;--d-red:#ef4444}
+html,body{height:100%;background:var(--d-bg)!important;color:var(--d-text)!important}
+body{font-family:'Hind Siliguri',sans-serif!important}
+[x-cloak]{display:none!important}
+
+/* Desktop: sidebar + working canvas, with no decorative empty header panel. */
+@media(min-width:1024px){
+  aside{width:286px!important;flex:0 0 286px!important;background:var(--d-sidebar)!important;border-right:1px solid rgba(148,163,184,.14)!important;box-shadow:10px 0 30px rgba(0,0,0,.18)!important}
+  aside>div:first-child{min-height:108px!important;padding:18px 20px!important;background:#14243a!important;border-bottom:1px solid rgba(250,204,21,.12)!important}
+  aside>div:first-child>div:first-child{gap:12px!important}
+  aside>div:first-child img{width:68px!important;height:68px!important;border-radius:17px!important;background:#fff!important;object-fit:contain!important;box-shadow:0 8px 22px rgba(0,0,0,.28)!important}
+}
+
+nav{padding:16px 12px!important;gap:4px!important}
+.sidebar-item{position:relative!important;min-height:48px!important;padding:.72rem .9rem!important;border-radius:11px!important;border:1px solid transparent!important;color:#a7b5c8!important;background:transparent!important;transition:background .16s ease,color .16s ease,border-color .16s ease,transform .16s ease!important}
+.sidebar-item i{width:28px!important;text-align:center!important;color:#8ea2bb!important}
+.sidebar-item span{margin-left:.45rem!important}
+.sidebar-item:hover{background:#16263b!important;color:#f8fafc!important;border-color:rgba(96,165,250,.13)!important;transform:translateX(2px)!important}
+.sidebar-item:hover i{color:#c8d7e9!important}
+.sidebar-item.active{background:linear-gradient(135deg,#facc15,#f59e0b)!important;color:#111827!important;border-color:#fde68a!important;box-shadow:0 8px 20px rgba(250,204,21,.16)!important;transform:none!important}
+.sidebar-item.active i{color:#111827!important}
+.sidebar-item:nth-child(3),.sidebar-item:nth-child(7),.sidebar-item:nth-child(10){margin-top:16px!important}
+.sidebar-item:nth-child(3)::before,.sidebar-item:nth-child(7)::before,.sidebar-item:nth-child(10)::before{content:"";position:absolute;left:8px;right:8px;top:-9px;height:1px;background:linear-gradient(90deg,transparent,rgba(250,204,21,.42),transparent)!important}
+
+/* Footer controls */
+.lang-switch-dash{display:inline-flex!important;align-items:center!important;gap:.45rem!important;cursor:pointer!important;padding:.45rem .8rem!important;border-radius:999px!important;background:#172a42!important;border:1px solid #38516c!important;color:#e8f1fb!important;font-weight:900!important;font-size:.75rem!important;transition:.18s ease!important}
+.lang-switch-dash:hover{background:#203854!important;border-color:#5d7898!important;transform:translateY(-1px)!important}
+.lang-switch-dash i{color:#7dd3fc!important}
+
+/* Main canvas */
+.aspi-dashboard-main{background:transparent!important}
+@media(min-width:1024px){.aspi-dashboard-main{width:min(1420px,calc(100% - 56px))!important;margin:0 auto!important;padding:30px 0 90px!important}}
+@media(max-width:1023px){.aspi-dashboard-main{padding:18px 14px 90px!important}}
+
+/* Page headings */
+.aspi-dashboard-main h1{font-weight:900!important;letter-spacing:-.02em!important;color:#f8fafc!important;border-bottom:0!important;padding-bottom:0!important}
+.aspi-dashboard-main h1::after{content:"";display:block;width:64px;height:3px;border-radius:999px;margin-top:9px;background:linear-gradient(90deg,#facc15,#f59e0b)}
+
+/* Cards/forms */
+.aspi-dashboard-main .bg-white.dark\:bg-slate-800,.aspi-dashboard-main .dark\:bg-slate-800{background:var(--d-card)!important;border-color:rgba(148,163,184,.15)!important}
+.aspi-dashboard-main .bg-white.dark\:bg-slate-800:hover{border-color:rgba(250,204,21,.22)!important}
+.aspi-dashboard-main input,.aspi-dashboard-main textarea,.aspi-dashboard-main select{background:var(--d-input)!important;color:#f8fafc!important;border:1px solid #3a5068!important;border-radius:11px!important;outline:none!important}
+.aspi-dashboard-main input:focus,.aspi-dashboard-main textarea:focus,.aspi-dashboard-main select:focus{border-color:#6b8db0!important;box-shadow:0 0 0 3px rgba(59,130,246,.12)!important}
+.aspi-dashboard-main input[type=file]{background:transparent!important;border:0!important}
+.aspi-dashboard-main .text-slate-500{color:#8fa1b8!important}.aspi-dashboard-main .text-slate-400{color:#a4b3c5!important}
+
+/* Every action button must read as a button. */
+.admin-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:.5rem!important;min-height:44px!important;padding:.68rem 1rem!important;border-radius:11px!important;font-weight:900!important;color:#fff!important;border:1px solid rgba(255,255,255,.15)!important;box-shadow:0 7px 16px rgba(0,0,0,.22)!important;cursor:pointer!important;transition:.16s ease!important}
+.admin-btn:hover{filter:brightness(1.08)!important;transform:translateY(-1px)!important}.admin-btn:disabled{opacity:.55!important;cursor:not-allowed!important;transform:none!important}
+.admin-btn-primary{background:#2563eb!important}.admin-btn-success{background:#16a34a!important}.admin-btn-danger{background:#dc2626!important}.admin-btn-info{background:#0891b2!important}.admin-btn-warning{background:#f59e0b!important;color:#111827!important}.admin-btn-muted{background:#475569!important}
+.floating-save{background:linear-gradient(135deg,#fde047,#f59e0b)!important;color:#111827!important;border:1px solid #fef08a!important;min-height:50px!important;border-radius:14px!important;box-shadow:0 12px 30px rgba(0,0,0,.35)!important}.floating-save *{color:#111827!important}
+
+/* Tables */
+.table-wrap{border:1px solid rgba(148,163,184,.14)!important;border-radius:16px!important;background:#132238!important}.table-wrap table{background:transparent!important}.table-wrap thead{background:#1b2d43!important}.table-wrap th{color:#c9d6e5!important}.table-wrap td{border-color:rgba(148,163,184,.10)!important}
+
+/* Compact page toolbar, not a giant top bar. */
+.aspi-page-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 22px;padding:14px 16px;border:1px solid rgba(148,163,184,.13);border-radius:15px;background:#101f33}
+.aspi-page-toolbar .status-dot{width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.10)}
+@media(max-width:640px){.aspi-page-toolbar{padding:12px;flex-wrap:wrap}.admin-btn{width:100%}.admin-btn.inline-auto{width:auto}.floating-save{right:14px!important;bottom:14px!important}}
+</style>
+
+
+<style id="aspi-v10-action-buttons">
+/* Unified action hierarchy: primary / secondary / success / danger / ghost. */
+:root{
+  --btn-primary:#2563eb;--btn-primary-hover:#3b82f6;
+  --btn-success:#16a34a;--btn-success-hover:#22c55e;
+  --btn-danger:#dc2626;--btn-danger-hover:#ef4444;
+  --btn-warning:#d97706;--btn-warning-hover:#f59e0b;
+  --btn-neutral:#334155;--btn-neutral-hover:#475569;
+}
+.aspi-dashboard-main button,
+.aspi-dashboard-main a[role="button"],
+.aspi-dashboard-main .admin-btn{
+  border:1px solid transparent!important;
+  font-weight:900!important;
+  letter-spacing:-.01em!important;
+  transition:background .16s ease,border-color .16s ease,color .16s ease,
+             box-shadow .16s ease,transform .16s ease,filter .16s ease!important;
+  text-shadow:none!important;
+}
+.aspi-dashboard-main button:hover,
+.aspi-dashboard-main a[role="button"]:hover,
+.aspi-dashboard-main .admin-btn:hover{
+  transform:translateY(-1px)!important;
+}
+.aspi-dashboard-main button:focus-visible,
+.aspi-dashboard-main a[role="button"]:focus-visible,
+.aspi-dashboard-main .admin-btn:focus-visible{
+  outline:3px solid rgba(250,204,21,.28)!important;
+  outline-offset:2px!important;
+}
+
+/* Any obvious create/add control gets a clearly visible blue primary treatment. */
+.aspi-dashboard-main button[title*="Add" i],
+.aspi-dashboard-main button[title*="Create" i],
+.aspi-dashboard-main button[aria-label*="Add" i],
+.aspi-dashboard-main button[aria-label*="Create" i],
+.aspi-dashboard-main .create-btn,
+.aspi-dashboard-main .add-btn{
+  background:linear-gradient(135deg,#3b82f6,#2563eb)!important;
+  color:#fff!important;
+  border-color:rgba(147,197,253,.38)!important;
+  box-shadow:0 8px 22px rgba(37,99,235,.22)!important;
+}
+
+/* Buttons whose text explicitly indicates creation in Bangla. */
+.aspi-dashboard-main button:not([disabled]){
+  /* Preserve existing semantic colors where inline classes/styles are present. */
+}
+.aspi-dashboard-main .bg-blue-600,.aspi-dashboard-main .bg-blue-700{
+  background:#2563eb!important;color:#fff!important;border-color:#60a5fa55!important;
+}
+.aspi-dashboard-main .bg-green-600,.aspi-dashboard-main .bg-green-700{
+  background:#16a34a!important;color:#fff!important;border-color:#86efac55!important;
+}
+.aspi-dashboard-main .bg-red-600,.aspi-dashboard-main .bg-red-700{
+  background:#dc2626!important;color:#fff!important;border-color:#fca5a555!important;
+}
+.aspi-dashboard-main .bg-yellow-400,.aspi-dashboard-main .bg-yellow-500{
+  background:#f59e0b!important;color:#111827!important;border-color:#fde68a!important;
+}
+.aspi-dashboard-main .bg-gray-600,.aspi-dashboard-main .bg-slate-600{
+  background:#334155!important;color:#f8fafc!important;border-color:#64748b55!important;
+}
+
+/* Save is always unmistakable. */
+.aspi-dashboard-main .floating-save,
+.aspi-dashboard-main button:has(i.fa-save),
+.aspi-dashboard-main button:has(i.fa-floppy-disk){
+  background:linear-gradient(135deg,#fde047,#f59e0b)!important;
+  color:#111827!important;
+  border-color:#fef08a!important;
+  box-shadow:0 10px 26px rgba(245,158,11,.22)!important;
+}
+
+/* Icon-only controls still need a readable hit area. */
+.aspi-dashboard-main button.w-8,
+.aspi-dashboard-main button.w-9,
+.aspi-dashboard-main button.w-10{
+  min-width:38px!important;min-height:38px!important;
+}
+
+/* Avoid low-contrast text on dark surfaces. */
+.aspi-dashboard-main button.text-slate-500,
+.aspi-dashboard-main button.text-gray-500{
+  color:#cbd5e1!important;
+}
+</style>
+
+</head>
+
+<body class="bg-slate-950 text-slate-200 dark:bg-slate-950 dark:text-slate-200 transition-colors duration-300">
+
+    <!-- Sidebar Overlay -->
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden"></div>
+
+    <!-- Floating Save -->
+    <div x-show="isDirty" x-cloak x-transition class="fixed bottom-5 right-5 z-50">
+        <button @click="saveData()" :disabled="isSaving" class="admin-btn floating-save">
+            <i class="fa-solid" :class="isSaving ? 'fa-circle-notch fa-spin' : 'fa-floppy-disk'"></i>
+            <span x-text="isSaving ? t('saving') : t('save')"></span>
+        </button>
+    </div>
+
+    <div class="flex h-screen w-full overflow-hidden">
+
+        <!-- SIDEBAR -->
+        <aside class="fixed inset-y-0 left-0 bg-white dark:bg-slate-900 w-72 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 z-50 lg:z-40 border-r border-slate-200 dark:border-slate-800 shadow-2xl lg:shadow-none flex flex-col" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+            <div class="p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md overflow-hidden"><img src="../assets/images/ASPI-Logo.png" class="w-full h-full object-contain" alt="ASPI"></div>
+                    <div>
+                        <h2 class="font-black text-lg text-slate-900 dark:text-white" x-text="t('admin_panel')"></h2>
+                        <p class="text-[10px] font-bold text-slate-500">ASPI</p>
+                    </div>
+                </div>
+                <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-red-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
+                <button @click="activeTab='dashboard'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='dashboard'?'active':''"><i class="fa-solid fa-chart-pie"></i><span x-text="t('overview')"></span></button>
+                <button @click="activeTab='admissions'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='admissions'?'active':''"><i class="fa-solid fa-user-graduate"></i><span x-text="t('admissions')"></span><span x-show="totalPending>0" class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full animate-pulse" x-text="totalPending"></span></button>
+                <button @click="activeTab='gallery'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='gallery'?'active':''"><i class="fa-solid fa-images"></i><span x-text="t('gallery_reports')"></span></button>
+                <button @click="activeTab='notices'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='notices'?'active':''"><i class="fa-solid fa-clipboard-list"></i><span x-text="t('notices')"></span></button>
+                <button @click="activeTab='notice_categories'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='notice_categories'?'active':''"><i class="fa-solid fa-tags"></i><span x-text="t('categories')"></span></button>
+                <button @click="activeTab='events'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='events'?'active':''"><i class="fa-solid fa-calendar-days"></i><span x-text="t('events_news')"></span></button>
+                <button @click="activeTab='teachers'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='teachers'?'active':''"><i class="fa-solid fa-user-tie"></i><span x-text="t('teachers')"></span></button>
+                <button @click="activeTab='courses'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='courses'?'active':''"><i class="fa-solid fa-book-open"></i><span x-text="t('courses')"></span></button>
+                <button @click="activeTab='quotes'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='quotes'?'active':''"><i class="fa-solid fa-quote-left"></i><span x-text="t('quotes')"></span></button>
+                <button @click="activeTab='content'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='content'?'active':''"><i class="fa-solid fa-file-lines"></i><span x-text="t('content_management')"></span></button>
+                <button @click="activeTab='social'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='social'?'active':''"><i class="fa-solid fa-share-nodes"></i><span x-text="t('social_media')"></span></button>
+                <button @click="activeTab='settings'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='settings'?'active':''"><i class="fa-solid fa-sliders"></i><span x-text="t('settings')"></span></button>
+                <button @click="activeTab='cleanup'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='cleanup'?'active':''"><i class="fa-solid fa-broom"></i><span x-text="t('cleanup')"></span></button>
+                <button @click="activeTab='users'; sidebarOpen=false" class="sidebar-item" :class="activeTab==='users'?'active':''"><i class="fa-solid fa-users"></i><span x-text="t('users')"></span></button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                <div class="flex items-center justify-between px-2">
+                    <span class="text-xs font-bold text-slate-500" x-text="currentLang === 'bn' ? 'বাংলা' : 'English'"></span>
+                    <div class="lang-switch-dash" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')">
+                        <i class="fa-solid fa-globe"></i>
+                        <span x-text="currentLang === 'bn' ? 'EN' : 'বাংলা'"></span>
+                    </div>
+                </div>
+                <a href="../index.html" target="_blank" class="flex items-center justify-center w-full py-2.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-sm transition-all font-bold text-brand-blue dark:text-brand-gold shadow-sm">
+                    <i class="fa-solid fa-globe mr-2"></i> <span x-text="t('view_website')"></span>
+                </a>
+                <button @click="logout()" class="flex items-center justify-center w-full py-2.5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl text-sm transition-all font-bold text-red-600 dark:text-red-400 shadow-sm">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i> <span x-text="t('logout')"></span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENT AREA -->
+
+            
+
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            <!-- Mobile Header -->
+            <header class="lg:hidden bg-white dark:bg-slate-800 shadow-sm px-4 py-3 flex items-center justify-between z-30 border-b border-slate-200 dark:border-slate-700 shrink-0">
+                <div class="flex items-center space-x-2 text-brand-gold"><img src="../assets/images/ASPI-Logo.png" class="w-9 h-9 rounded-lg object-contain bg-white" alt="ASPI"><span class="font-black text-lg">ASPI Admin</span></div>
+                <div class="flex items-center space-x-3">
+                    <div class="lang-switch-dash" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')">
+                        <i class="fa-solid fa-globe"></i>
+                        <span x-text="currentLang === 'bn' ? 'EN' : 'বাংলা'"></span>
+                    </div>
+                    <button @click="sidebarOpen = !sidebarOpen" class="text-2xl text-slate-600 dark:text-slate-300"><i class="fa-solid fa-bars"></i></button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 sm:p-8 relative z-0 pb-24 aspi-dashboard-main">
+                <div class="aspi-page-toolbar">
+                    <div class="flex items-center gap-3">
+                        <div class="status-dot" :style="health.status==='ok' ? 'background:#22c55e' : 'background:#f59e0b'"></div>
+                        <div><div class="text-sm font-black text-white" x-text="currentLang === 'bn' ? 'অ্যাডমিন কন্ট্রোল সেন্টার' : 'Admin Control Center'"></div><div class="text-[11px] text-slate-400 font-bold" x-text="currentLang === 'bn' ? 'ওয়েবসাইটের কনটেন্ট ও সেটিংস নিয়ন্ত্রণ করুন' : 'Manage website content and settings'"></div></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="hidden sm:inline text-[11px] text-slate-500 font-bold" x-text="isDirty ? (currentLang === 'bn' ? 'পরিবর্তন সংরক্ষণ বাকি' : 'Unsaved changes') : (currentLang === 'bn' ? 'সব পরিবর্তন সংরক্ষিত' : 'All changes saved')"></span>
+                        <a href="../index.html" target="_blank" class="admin-btn admin-btn-muted inline-auto"><i class="fa-solid fa-arrow-up-right-from-square"></i><span x-text="t('view_website')"></span></a>
+                    </div>
+                </div>
+                <div x-show="isLoading" class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50">
+                    <i class="fa-solid fa-circle-notch fa-spin text-5xl text-brand-blue dark:text-brand-gold"></i>
+                </div>
+
+                <!-- ==================== DASHBOARD ==================== -->
+                <div x-show="activeTab === 'dashboard'" x-transition>
+                    <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white mb-8 border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('overview')"></h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:shadow-md transition-shadow cursor-pointer" @click="activeTab='admissions'">
+                            <div><p class="text-sm text-slate-500 dark:text-slate-400 font-bold mb-1" x-text="t('pending_applications')"></p><h3 class="text-3xl font-black text-red-500" x-text="totalPending"></h3></div>
+                            <div class="w-14 h-14 bg-red-50 dark:bg-slate-700 text-red-500 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-user-graduate"></i></div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                            <div><p class="text-sm text-slate-500 dark:text-slate-400 font-bold mb-1" x-text="t('gallery_items')"></p><h3 class="text-3xl font-black text-emerald-500" x-text="galleryItems.length"></h3></div>
+                            <div class="w-14 h-14 bg-emerald-50 dark:bg-slate-700 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-image"></i></div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                            <div><p class="text-sm text-slate-500 dark:text-slate-400 font-bold mb-1" x-text="t('quotes')"></p><h3 class="text-3xl font-black text-purple-500" x-text="quotes.length"></h3></div>
+                            <div class="w-14 h-14 bg-purple-50 dark:bg-slate-700 text-purple-500 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-quote-left"></i></div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                            <div><p class="text-sm text-slate-500 dark:text-slate-400 font-bold mb-1" x-text="t('social_links')"></p><h3 class="text-3xl font-black text-blue-500" x-text="socialLinks.length"></h3></div>
+                            <div class="w-14 h-14 bg-blue-50 dark:bg-slate-700 text-blue-500 rounded-2xl flex items-center justify-center text-2xl"><i class="fa-solid fa-share-nodes"></i></div>
+                        </div>
+                    </div>
+                    <!-- Admission Status Quick View -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                            <span class="font-bold" x-text="t('master_admission')"></span>
+                            <span :class="data.site.master_admission ? 'text-emerald-500' : 'text-red-500'" x-text="data.site.master_admission ? t('active') : t('inactive')"></span>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                            <span class="font-bold" x-text="t('diploma_admission')"></span>
+                            <span :class="data.site.diploma_admission ? 'text-emerald-500' : 'text-red-500'" x-text="data.site.diploma_admission ? t('active') : t('inactive')"></span>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                            <span class="font-bold" x-text="t('nsda_admission')"></span>
+                            <span :class="data.site.nsda_admission ? 'text-emerald-500' : 'text-red-500'" x-text="data.site.nsda_admission ? t('active') : t('inactive')"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== ADMISSIONS ==================== -->
+                <div x-show="activeTab === 'admissions'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('admissions')"></h1>
+                        <div class="flex gap-2 flex-wrap">
+                            <button @click="admissionFilter='all'" class="px-4 py-2 rounded-xl font-bold text-sm transition" :class="admissionFilter==='all'?'bg-brand-blue text-white':'bg-slate-100 dark:bg-slate-700'" x-text="t('all')"></button>
+                            <button @click="admissionFilter='diploma'" class="px-4 py-2 rounded-xl font-bold text-sm transition" :class="admissionFilter==='diploma'?'bg-brand-blue text-white':'bg-slate-100 dark:bg-slate-700'" x-text="t('diploma')"></button>
+                            <button @click="admissionFilter='nsda'" class="px-4 py-2 rounded-xl font-bold text-sm transition" :class="admissionFilter==='nsda'?'bg-brand-blue text-white':'bg-slate-100 dark:bg-slate-700'" x-text="t('nsda')"></button>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-sm text-left whitespace-nowrap">
+                                <thead class="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-900/50">
+                                    <tr>
+                                        <th class="px-4 py-3 font-black" x-text="t('name')"></th>
+                                        <th class="px-4 py-3 font-black" x-text="t('father')"></th>
+                                        <th class="px-4 py-3 font-black" x-text="t('mother')"></th>
+                                        <th class="px-4 py-3 font-black" x-text="t('phone')"></th>
+                                        <th class="px-4 py-3 font-black" x-text="t('gpa')"></th>
+                                        <th class="px-4 py-3 font-black" x-text="t('course')"></th>
+                                        <th class="px-4 py-3 font-black" x-text="t('type')"></th>
+                                        <th class="px-4 py-3 font-black text-center" x-text="t('status')"></th>
+                                        <th class="px-4 py-3 font-black text-center" x-text="t('pdf')"></th>
+                                        <th class="px-4 py-3 font-black text-center" x-text="t('actions')"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                                    <template x-if="filteredAdmissions.length===0"><tr><td colspan="10" class="px-4 py-10 text-center font-bold text-slate-500" x-text="t('no_applications')"></td></tr></template>
+                                    <template x-for="app in filteredAdmissions" :key="app.id">
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" :class="app.is_read==0?'bg-blue-50/50 dark:bg-blue-900/10 font-bold':''">
+                                            <td class="px-4 py-3"><span x-show="app.is_read==0" class="w-2 h-2 inline-block bg-red-500 rounded-full mr-2 animate-pulse"></span><span x-text="app.student_name"></span></td>
+                                            <td class="px-4 py-3" x-text="app.father_name"></td>
+                                            <td class="px-4 py-3" x-text="app.mother_name"></td>
+                                            <td class="px-4 py-3" x-text="app.phone"></td>
+                                            <td class="px-4 py-3" x-text="app.ssc_gpa || app.ssc_status || '-'"></td>
+                                            <td class="px-4 py-3" x-text="app.course_name"></td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 text-[10px] font-black rounded-lg" :class="app.admission_type==='diploma'?'bg-indigo-100 text-indigo-700':'bg-emerald-100 text-emerald-700'" x-text="app.admission_type"></span></td>
+                                            <td class="px-4 py-3 text-center"><span class="px-2 py-1 text-xs font-bold rounded-full" :class="'badge-'+app.status" x-text="app.status"></span></td>
+                                            <td class="px-4 py-3 text-center"><a :href="'../api.php?action=download_pdf&id='+app.id" target="_blank" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-file-pdf text-lg"></i></a></td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="flex items-center justify-center gap-1 flex-wrap">
+                                                    <button @click="updateStatus(app.id,'accepted')" class="admin-btn admin-btn-success inline-auto text-xs px-2 py-1" x-text="t('accept')"></button>
+                                                    <button @click="updateStatus(app.id,'rejected')" class="admin-btn admin-btn-danger inline-auto text-xs px-2 py-1" x-text="t('reject')"></button>
+                                                    <button @click="editAdmission(app)" class="admin-btn admin-btn-primary inline-auto text-xs px-2 py-1" x-text="t('edit')"></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Edit Modal -->
+                    <div x-show="editModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center px-4" x-cloak>
+                        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="editModalOpen=false"></div>
+                        <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl shadow-2xl z-10 p-6 modal-content">
+                            <h3 class="text-xl font-black mb-4" x-text="t('edit_application')"></h3>
+                            <div class="space-y-3">
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('phone')"></label><input type="text" x-model="editForm.phone" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('address')"></label><textarea x-model="editForm.address" rows="2" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></textarea></div>
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('course')"></label><input type="text" x-model="editForm.course_name" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                            </div>
+                            <div class="flex gap-3 mt-6">
+                                <button @click="saveEdit()" class="admin-btn admin-btn-success flex-1" x-text="t('save')"></button>
+                                <button @click="editModalOpen=false" class="admin-btn admin-btn-muted flex-1" x-text="t('cancel')"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== GALLERY ==================== -->
+                <div x-show="activeTab === 'gallery'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('gallery_reports')"></h1>
+                        <button @click="openGalleryUpload()" class="px-5 py-2.5 bg-emerald-500 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-plus mr-2"></i> <span x-text="t('add_gallery_item')"></span></button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="item in galleryItems" :key="item.id">
+                            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden group relative">
+                                <button @click="deleteGalleryItem(item.id)" class="absolute top-3 right-3 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10 shadow-lg"><i class="fa-solid fa-trash"></i></button>
+                                <div class="relative h-48 bg-slate-100 dark:bg-slate-700">
+                                    <img :src="'../' + item.thumbnail" class="w-full h-full object-cover" x-show="item.thumbnail">
+                                    <div x-show="!item.thumbnail" class="w-full h-full flex items-center justify-center text-slate-400"><i class="fa-solid fa-image text-4xl"></i></div>
+                                    <div class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full" x-text="item.attachments_count + ' ' + t('attachments')"></div>
+                                </div>
+                                <div class="p-4 space-y-2">
+                                    <input type="text" x-model="item.title_bn" :placeholder="t('title_bn')" class="w-full border rounded-lg px-3 py-1.5 text-sm font-bold dark:bg-slate-700">
+                                    <input type="text" x-model="item.title_en" :placeholder="t('title_en')" class="w-full border rounded-lg px-3 py-1.5 text-sm font-bold dark:bg-slate-700">
+                                    <div class="flex items-center gap-2">
+                                        <label class="flex items-center cursor-pointer text-xs"><input type="checkbox" x-model="item.status" class="mr-1"> <span x-text="t('publish')"></span></label>
+                                        <span class="text-xs text-slate-400">|</span>
+                                        <button @click="openAttachments(item)" class="admin-btn admin-btn-info inline-auto text-xs" x-text="t('manage_attachments')"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="galleryItems.length===0"><div class="col-span-full text-center text-slate-500 py-10 font-bold" x-text="t('no_gallery_items')"></div></template>
+                    </div>
+                    <!-- Attachment Modal -->
+                    <div x-show="attachmentModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center px-4" x-cloak>
+                        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="attachmentModalOpen=false"></div>
+                        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl z-10 p-6 modal-content max-h-[90vh] overflow-y-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-black" x-text="t('attachments') + ' - ' + currentGalleryItem?.title_bn"></h3>
+                                <button @click="attachmentModalOpen=false" class="text-slate-400 hover:text-red-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="mb-4">
+                                <input type="file" accept="image/*,application/pdf,video/*" @change="uploadAttachment($event)" class="w-full text-sm file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-brand-blue/10 dark:file:bg-brand-gold/10 file:text-brand-blue dark:file:text-brand-gold cursor-pointer">
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <template x-for="att in currentAttachments" :key="att.id">
+                                    <div class="relative group border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden">
+                                        <button @click="deleteAttachment(att.id)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><i class="fa-solid fa-xmark"></i></button>
+                                        <img x-show="att.type==='image'" :src="'../'+att.file_url" class="w-full h-24 object-cover">
+                                        <video x-show="att.type==='video'" :src="'../'+att.file_url" class="w-full h-24 object-cover" controls></video>
+                                        <div x-show="att.type==='pdf'" class="w-full h-24 bg-red-100 dark:bg-red-900/30 flex items-center justify-center"><i class="fa-solid fa-file-pdf text-3xl text-red-500"></i></div>
+                                        <div class="p-1 text-center text-[10px] text-slate-500 truncate" x-text="att.file_url.split('/').pop()"></div>
+                                    </div>
+                                </template>
+                                <template x-if="currentAttachments.length===0"><div class="col-span-full text-center text-slate-500 py-6 text-sm" x-text="t('no_attachments')"></div></template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== NOTICES ==================== -->
+                <div x-show="activeTab === 'notices'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('notices')"></h1>
+                        <button @click="addNotice()" class="px-5 py-2.5 bg-brand-blue dark:bg-brand-gold dark:text-slate-900 text-white rounded-xl font-bold shadow-lg hover:opacity-90 transition-all text-sm"><i class="fa-solid fa-plus mr-2"></i> <span x-text="t('add_notice')"></span></button>
+                    </div>
+                    <div class="space-y-4">
+                        <template x-for="(notice, index) in data.notices" :key="notice.id || index">
+                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative group">
+                                <button @click="deleteItem('notices', index)" class="absolute top-4 right-4 text-red-500 bg-red-50 dark:bg-red-900/30 p-2 rounded-xl hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash"></i></button>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pr-12">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('date')"></label>
+                                        <input type="date" x-model="notice.date" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700">
+                                        <div class="flex gap-2 mt-1">
+                                            <input type="text" x-model="notice.date_bn" :placeholder="t('date_bn')" class="w-1/2 border rounded-lg px-2 py-1 text-xs dark:bg-slate-700">
+                                            <input type="text" x-model="notice.date_en" placeholder="Date (EN)" class="w-1/2 border rounded-lg px-2 py-1 text-xs dark:bg-slate-700">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('category')"></label>
+                                        <select x-model="notice.category_id" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700">
+                                            <option value="0">-- <span x-text="t('select_category')"></span> --</option>
+                                            <template x-for="cat in noticeCategories" :key="cat.id">
+                                                <option :value="cat.id" x-text="cat.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('sub_category')"></label>
+                                        <select x-model="notice.sub_category_id" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700">
+                                            <option value="0">-- <span x-text="t('select_sub_category')"></span> --</option>
+                                            <template x-for="cat in noticeCategories.filter(c => c.parent_id == notice.category_id)" :key="cat.id">
+                                                <option :value="cat.id" x-text="cat.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-2"><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('title_bn')"></label><input type="text" x-model="notice.title_bn" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                    <div class="col-span-2"><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('title_en')"></label><input type="text" x-model="notice.title_en" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4">
+                                    <div class="flex-1"><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2" x-text="t('file_upload')"></label>
+                                        <input type="file" @change="uploadFile($event, notice, 'file_url')" class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-brand-blue/10 dark:file:bg-brand-gold/10 file:text-brand-blue dark:file:text-brand-gold cursor-pointer">
+                                        <span x-show="notice.file_url" class="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-check-circle mr-1"></i> <span x-text="t('uploaded')"></span></span>
+                                    </div>
+                                    <div class="flex flex-col space-y-2 border-l-2 border-slate-200 dark:border-slate-700 pl-4">
+                                        <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="notice.isNew" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold text-red-500" x-text="t('new_badge')"></span></label>
+                                        <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="notice.showInMarquee" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold" x-text="t('show_in_marquee')"></span></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- ==================== NOTICE CATEGORIES ==================== -->
+                <div x-show="activeTab === 'notice_categories'" x-cloak x-transition>
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('categories')"></h1>
+                        <button @click="addNoticeCategory()" class="px-5 py-2.5 bg-purple-500 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-plus mr-2"></i> <span x-text="t('add_category')"></span></button>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-900/50">
+                                <tr><th class="px-4 py-3 font-black" x-text="t('name_bn')"></th><th class="px-4 py-3 font-black" x-text="t('name_en')"></th><th class="px-4 py-3 font-black" x-text="t('parent')"></th><th class="px-4 py-3 font-black text-center" x-text="t('actions')"></th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                                <template x-for="cat in noticeCategories" :key="cat.id">
+                                    <tr>
+                                        <td class="px-4 py-3"><input type="text" x-model="cat.name_bn" class="w-full border rounded px-2 py-1 text-sm dark:bg-slate-700"></td>
+                                        <td class="px-4 py-3"><input type="text" x-model="cat.name_en" class="w-full border rounded px-2 py-1 text-sm dark:bg-slate-700"></td>
+                                        <td class="px-4 py-3">
+                                            <select x-model="cat.parent_id" class="w-full border rounded px-2 py-1 text-sm dark:bg-slate-700">
+                                                <option value="0">-- <span x-text="t('none')"></span> --</option>
+                                                <template x-for="p in noticeCategories.filter(c => c.id != cat.id)" :key="p.id">
+                                                    <option :value="p.id" x-text="p.name_bn"></option>
+                                                </template>
+                                            </select>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <button @click="deleteNoticeCategory(cat.id)" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-xs font-bold hover:bg-red-200"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ==================== EVENTS & NEWS ==================== -->
+                <div x-show="activeTab === 'events'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('events_news')"></h1>
+                        <div class="flex gap-2">
+                            <button @click="eventType = 'event'; activeSubTab = 'list'" class="px-4 py-2 rounded-xl font-bold text-sm" :class="eventType === 'event' ? 'bg-brand-blue text-white' : 'bg-slate-100 dark:bg-slate-700'" x-text="t('events')"></button>
+                            <button @click="eventType = 'news'; activeSubTab = 'list'" class="px-4 py-2 rounded-xl font-bold text-sm" :class="eventType === 'news' ? 'bg-brand-blue text-white' : 'bg-slate-100 dark:bg-slate-700'" x-text="t('news')"></button>
+                            <button @click="openEventEditor()" class="px-5 py-2.5 bg-emerald-500 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-plus mr-2"></i> <span x-text="t('add_new')"></span></button>
+                        </div>
+                    </div>
+
+                    <!-- List View -->
+                    <div x-show="activeSubTab === 'list'">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <template x-for="item in (eventType === 'event' ? data.events : data.news)" :key="item.id">
+                                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden group relative">
+                                    <button @click="deleteEvent(item.id)" class="absolute top-3 right-3 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10 shadow-lg"><i class="fa-solid fa-trash"></i></button>
+                                    <div class="relative h-48 bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                                        <template x-if="item.media && item.media.length">
+                                            <div class="w-full h-full bg-slate-900">
+                                                <img x-show="item.media[0].type==='image'" :src="assetUrl(item.media[0].file_url)" class="w-full h-full object-cover">
+                                                <video x-show="item.media[0].type==='video'" :src="assetUrl(item.media[0].file_url)" class="w-full h-full object-cover" muted></video>
+                                            </div>
+                                        </template>
+                                        <template x-if="(!item.media || !item.media.length) && item.file_url"><img :src="assetUrl(item.file_url)" class="w-full h-full object-cover"></template>
+                                        <div x-show="(!item.file_url && (!item.media || !item.media.length))" class="w-full h-full flex items-center justify-center text-slate-400"><i class="fa-solid fa-photo-film text-4xl"></i></div>
+                                        <span class="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-full" x-text="(item.media ? item.media.length : 0) + ' ' + t('media')"></span>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-bold text-lg text-slate-800 dark:text-white line-clamp-2" x-text="item.title_bn || item.title_en"></h3>
+                                        <p class="text-xs text-slate-500 mt-1" x-text="item.date"></p>
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <span class="text-xs text-slate-400" :class="item.status ? 'text-emerald-500' : 'text-red-500'" x-text="item.status ? t('published') : t('draft')"></span>
+                                            <button @click="editEvent(item)" class="admin-btn admin-btn-primary inline-auto text-xs" x-text="t('edit')"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="(eventType === 'event' ? data.events : data.news).length === 0">
+                                <div class="col-span-full text-center text-slate-500 py-10 font-bold" x-text="t('no_items')"></div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Editor Modal -->
+                    <div x-show="editorOpen" class="fixed inset-0 z-[100] flex items-center justify-center px-4" x-cloak>
+                        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="editorOpen = false"></div>
+                        <div class="bg-white dark:bg-slate-800 w-full max-w-4xl rounded-3xl shadow-2xl z-10 p-6 modal-content max-h-[90vh] overflow-y-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-black" x-text="editingEvent ? t('edit') + ' ' + t(eventType) : t('add') + ' ' + t(eventType)"></h3>
+                                <button @click="editorOpen = false" class="text-slate-400 hover:text-red-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="space-y-4">
+                                <input type="hidden" x-model="eventForm.id">
+                                <div>
+                                    <label class="block text-sm font-bold mb-1" x-text="t('type')"></label>
+                                    <select x-model="eventForm.type" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700">
+                                        <option value="event" x-text="t('event')"></option>
+                                        <option value="news" x-text="t('news')"></option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-bold mb-1" x-text="t('title_bn')"></label><input type="text" x-model="eventForm.title_bn" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                    <div><label class="block text-sm font-bold mb-1" x-text="t('title_en')"></label><input type="text" x-model="eventForm.title_en" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-bold mb-1" x-text="t('category_bn')"></label><input type="text" x-model="eventForm.category_bn" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                    <div><label class="block text-sm font-bold mb-1" x-text="t('category_en')"></label><input type="text" x-model="eventForm.category_en" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                </div>
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('date')"></label><input type="date" x-model="eventForm.date" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-bold mb-1" x-text="t('description_bn')"></label><textarea x-model="eventForm.description_bn" rows="2" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></textarea></div>
+                                    <div><label class="block text-sm font-bold mb-1" x-text="t('description_en')"></label><textarea x-model="eventForm.description_en" rows="2" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></textarea></div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold mb-1" x-text="t('content_bn')"></label>
+                                    <textarea x-model="eventForm.content_bn" rows="8" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></textarea>
+                                    <p class="text-xs text-slate-400 mt-1" x-text="t('rich_editor_hint')"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold mb-1" x-text="t('content_en')"></label>
+                                    <textarea x-model="eventForm.content_en" rows="8" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></textarea>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 p-4 space-y-4">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div>
+                                            <label class="block text-sm font-black" x-text="t('media')"></label>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="t('media_upload_hint')"></p>
+                                        </div>
+                                        <span class="admin-btn admin-btn-info inline-auto text-xs" x-show="eventMedia.length" x-text="eventMedia.length + ' ' + t('media')"></span>
+                                    </div>
+                                    <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/ogg" @change="stageEventMedia($event)" class="w-full text-sm file:mr-2 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-blue-600 file:text-white cursor-pointer">
+                                    <div x-show="pendingEventMedia.length" class="text-xs font-bold text-slate-600 dark:text-slate-300">
+                                        <span x-text="t('selected_files')"></span>: <span x-text="pendingEventMedia.length"></span>
+                                    </div>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        <template x-for="media in eventMedia" :key="media.id">
+                                            <div class="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600 bg-slate-800">
+                                                <img x-show="media.type==='image'" :src="assetUrl(media.file_url)" class="w-full h-24 object-cover">
+                                                <video x-show="media.type==='video'" :src="assetUrl(media.file_url)" class="w-full h-24 object-cover" muted></video>
+                                                <span class="absolute left-1 bottom-1 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded" x-text="media.type"></span>
+                                                <button type="button" @click="deleteEventMedia(media.id)" class="absolute right-1 top-1 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg"><i class="fa-solid fa-trash text-xs"></i></button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="eventForm.showInMarquee" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded"><span class="ml-2 text-sm font-bold" x-text="t('show_in_marquee')"></span></label>
+                                    <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="eventForm.status" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded"><span class="ml-2 text-sm font-bold" x-text="t('publish')"></span></label>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 mt-6">
+                                <button @click="saveEvent()" class="admin-btn admin-btn-success flex-1" x-text="t('save')"></button>
+                                <button @click="editorOpen = false" class="admin-btn admin-btn-muted flex-1" x-text="t('cancel')"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== TEACHERS ==================== -->
+                <div x-show="activeTab === 'teachers'" x-cloak x-transition>
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('teachers')"></h1>
+                        <button @click="addTeacher()" class="px-5 py-2.5 bg-brand-blue dark:bg-brand-gold dark:text-slate-900 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-user-plus mr-2"></i> <span x-text="t('add_teacher')"></span></button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="(teacher, index) in data.teachers" :key="teacher.id || index">
+                            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 text-center relative group hover:shadow-md transition-all">
+                                <button @click="deleteItem('teachers', index)" class="absolute top-4 right-4 text-red-400 hover:text-red-500 bg-red-50 dark:bg-red-900/30 w-8 h-8 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-trash"></i></button>
+                                <div class="w-28 h-28 mx-auto rounded-full bg-slate-100 dark:bg-slate-700 border-4 border-slate-50 dark:border-slate-600 flex items-center justify-center overflow-hidden mb-5 relative shadow-inner">
+                                    <img x-show="teacher.file_url" :src="assetUrl(teacher.file_url)" class="w-full h-full object-cover">
+                                    <i x-show="!teacher.file_url" class="fa-solid fa-user-tie text-3xl text-slate-300 dark:text-slate-500"></i>
+                                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <label class="cursor-pointer text-white text-xs font-bold w-full h-full flex flex-col items-center justify-center"><i class="fa-solid fa-camera mb-1 block text-lg"></i> <span x-text="t('upload_photo')"></span><input type="file" class="hidden" accept="image/*" @change="uploadFile($event, teacher, 'file_url')"></label>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div><label class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block mb-0.5 text-left" x-text="t('name_bn')"></label><input type="text" x-model="teacher.name_bn" class="w-full border-b-2 border-slate-200 dark:border-slate-600 bg-transparent dark:text-white px-1 py-1 text-base font-bold focus:border-brand-blue dark:focus:border-brand-gold outline-none text-center"></div>
+                                    <div><label class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block mb-0.5 text-left" x-text="t('name_en')"></label><input type="text" x-model="teacher.name_en" class="w-full border-b-2 border-slate-200 dark:border-slate-600 bg-transparent dark:text-white px-1 py-1 text-base font-bold focus:border-brand-blue dark:focus:border-brand-gold outline-none text-center"></div>
+                                    <div><label class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block mb-0.5 text-left" x-text="t('deg_bn')"></label><input type="text" x-model="teacher.deg_bn" class="w-full border-b-2 border-slate-200 dark:border-slate-600 bg-transparent dark:text-brand-gold px-1 py-1 text-sm font-black text-brand-blue focus:border-brand-blue dark:focus:border-brand-gold outline-none text-center"></div>
+                                    <div><label class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block mb-0.5 text-left" x-text="t('deg_en')"></label><input type="text" x-model="teacher.deg_en" class="w-full border-b-2 border-slate-200 dark:border-slate-600 bg-transparent dark:text-brand-gold px-1 py-1 text-sm font-black text-brand-blue focus:border-brand-blue dark:focus:border-brand-gold outline-none text-center"></div>
+                                    <div><label class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block mb-0.5 text-left" x-text="t('dept_bn')"></label><input type="text" x-model="teacher.dept_bn" class="w-full border-b-2 border-slate-200 dark:border-slate-600 bg-transparent dark:text-white px-1 py-1 text-xs font-bold focus:border-brand-blue dark:focus:border-brand-gold outline-none text-center"></div>
+                                    <div><label class="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 block mb-0.5 text-left" x-text="t('dept_en')"></label><input type="text" x-model="teacher.dept_en" class="w-full border-b-2 border-slate-200 dark:border-slate-600 bg-transparent dark:text-white px-1 py-1 text-xs font-bold focus:border-brand-blue dark:focus:border-brand-gold outline-none text-center"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- ==================== COURSES ==================== -->
+                <div x-show="activeTab === 'courses'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('courses')"></h1>
+                        <button @click="addCourse()" class="px-5 py-2.5 bg-emerald-500 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-plus mr-2"></i> <span x-text="t('add_course')"></span></button>
+                    </div>
+                    <div class="space-y-4">
+                        <template x-for="(course, index) in data.courses" :key="course.id || index">
+                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative group">
+                                <button @click="deleteItem('courses', index)" class="absolute top-3 right-3 text-red-400 hover:text-red-500 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash"></i></button>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('title_bn')"></label><input type="text" x-model="course.title_bn" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('title_en')"></label><input type="text" x-model="course.title_en" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('type')"></label>
+                                        <select x-model="course.type" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700">
+                                            <option value="diploma" x-text="t('diploma')"></option>
+                                            <option value="nsda" x-text="t('nsda')"></option>
+                                        </select>
+                                    </div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('level_bn')"></label><input type="text" x-model="course.level_bn" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('level_en')"></label><input type="text" x-model="course.level_en" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- ==================== QUOTES ==================== -->
+                <div x-show="activeTab === 'quotes'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('quotes')"></h1>
+                        <button @click="addQuote()" class="px-5 py-2.5 bg-purple-500 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-plus mr-2"></i> <span x-text="t('add_quote')"></span></button>
+                    </div>
+                    <div class="space-y-5">
+                        <template x-for="(quote, index) in quotes" :key="quote.id || index">
+                            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 relative group">
+                                <button @click="deleteQuote(index)" class="absolute top-5 right-5 text-red-500 bg-red-50 dark:bg-red-900/30 p-2.5 rounded-xl hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash"></i></button>
+                                <div class="flex flex-col md:flex-row gap-6">
+                                    <div class="w-32 h-32 mx-auto md:mx-0 rounded-full bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-300 dark:border-slate-500 flex items-center justify-center overflow-hidden relative group/img cursor-pointer shadow-inner shrink-0">
+                                        <img x-show="quote.image_url" :src="'../' + quote.image_url" class="w-full h-full object-cover">
+                                        <i x-show="!quote.image_url" class="fa-solid fa-user-tie text-4xl text-slate-300 dark:text-slate-500"></i>
+                                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"><i class="fa-solid fa-camera text-white text-xl"></i></div>
+                                        <input type="file" accept="image/*" @change="uploadFile($event, quote, 'image_url')" class="absolute inset-0 opacity-0 cursor-pointer">
+                                    </div>
+                                    <div class="flex-1 space-y-3">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('name_bn')"></label><input type="text" x-model="quote.name_bn" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                            <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('name_en')"></label><input type="text" x-model="quote.name_en" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                            <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('designation_bn')"></label><input type="text" x-model="quote.designation_bn" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                            <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('designation_en')"></label><input type="text" x-model="quote.designation_en" class="w-full border rounded-xl px-3 py-2 text-sm font-bold dark:bg-slate-700"></div>
+                                        </div>
+                                        <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('quote_bn')"></label><textarea x-model="quote.quote_bn" rows="2" class="w-full border rounded-xl px-3 py-2 text-sm font-medium dark:bg-slate-700"></textarea></div>
+                                        <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('quote_en')"></label><textarea x-model="quote.quote_en" rows="2" class="w-full border rounded-xl px-3 py-2 text-sm font-medium dark:bg-slate-700"></textarea></div>
+                                        <div class="flex items-center gap-4">
+                                            <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="quote.status" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold" x-text="t('publish')"></span></label>
+                                            <span class="text-xs text-slate-400">|</span>
+                                            <span class="text-xs text-slate-400"><span x-text="t('sort_order')"></span>: <input type="number" x-model="quote.sort_order" class="w-16 border rounded px-1 py-0.5 text-xs dark:bg-slate-700"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="quotes.length===0"><div class="text-center text-slate-500 py-10 font-bold" x-text="t('no_quotes')"></div></template>
+                    </div>
+                </div>
+
+                <!-- ==================== CONTENT MANAGEMENT ==================== -->
+                <div x-show="activeTab === 'content'" x-cloak x-transition>
+                    <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white mb-8 border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('content_management')"></h1>
+                    <div class="space-y-6">
+                        <!-- About -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            <h2 class="font-black text-xl mb-4" x-text="t('about_us')"></h2>
+                            <div class="space-y-3">
+                                <div><label class="block text-sm font-bold" x-text="t('content_bn')"></label><textarea x-model="content.about_bn" rows="4" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                                <div><label class="block text-sm font-bold" x-text="t('content_en')"></label><textarea x-model="content.about_en" rows="4" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="content.about_status" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold" x-text="t('publish')"></span></label>
+                            </div>
+                        </div>
+                        <!-- Mission & Vision -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            <h2 class="font-black text-xl mb-4" x-text="t('mission_vision')"></h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-bold" x-text="t('mission_bn')"></label><textarea x-model="content.mission_bn" rows="3" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                                <div><label class="block text-sm font-bold" x-text="t('mission_en')"></label><textarea x-model="content.mission_en" rows="3" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                                <div><label class="block text-sm font-bold" x-text="t('vision_bn')"></label><textarea x-model="content.vision_bn" rows="3" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                                <div><label class="block text-sm font-bold" x-text="t('vision_en')"></label><textarea x-model="content.vision_en" rows="3" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                            </div>
+                            <label class="flex items-center cursor-pointer mt-3"><input type="checkbox" x-model="content.mv_status" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold" x-text="t('publish')"></span></label>
+                        </div>
+                        <!-- Objectives -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            <h2 class="font-black text-xl mb-4" x-text="t('objectives')"></h2>
+                            <div class="space-y-3">
+                                <div><label class="block text-sm font-bold" x-text="t('content_bn')"></label><textarea x-model="content.objectives_bn" rows="4" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                                <div><label class="block text-sm font-bold" x-text="t('content_en')"></label><textarea x-model="content.objectives_en" rows="4" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></textarea></div>
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="content.objectives_status" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold" x-text="t('publish')"></span></label>
+                            </div>
+                        </div>
+                        <!-- FAQ -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="font-black text-xl" x-text="t('faq')"></h2>
+                                <button @click="addFaq()" class="admin-btn admin-btn-primary inline-auto"><i class="fa-solid fa-plus mr-1"></i> <span x-text="t('add_faq')"></span></button>
+                            </div>
+                            <div class="space-y-4">
+                                <template x-for="(faq, index) in faqs" :key="faq.id || index">
+                                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 relative group">
+                                        <button @click="deleteFaq(index)" class="absolute top-2 right-2 text-red-400 hover:text-red-500 text-sm"><i class="fa-solid fa-trash"></i></button>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div><label class="block text-xs font-bold" x-text="t('question_bn')"></label><input type="text" x-model="faq.question_bn" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></div>
+                                            <div><label class="block text-xs font-bold" x-text="t('question_en')"></label><input type="text" x-model="faq.question_en" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></div>
+                                            <div class="md:col-span-2"><label class="block text-xs font-bold" x-text="t('answer_bn')"></label><textarea x-model="faq.answer_bn" rows="2" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></textarea></div>
+                                            <div class="md:col-span-2"><label class="block text-xs font-bold" x-text="t('answer_en')"></label><textarea x-model="faq.answer_en" rows="2" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></textarea></div>
+                                        </div>
+                                        <label class="flex items-center cursor-pointer mt-2"><input type="checkbox" x-model="faq.status" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold" x-text="t('publish')"></span></label>
+                                    </div>
+                                </template>
+                                <template x-if="faqs.length===0"><div class="text-center text-slate-500 py-4 text-sm" x-text="t('no_faqs')"></div></template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SOCIAL MEDIA ==================== -->
+                <div x-show="activeTab === 'social'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('social_media')"></h1>
+                        <button @click="addSocialLink()" class="px-5 py-2.5 bg-blue-500 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-plus mr-2"></i> <span x-text="t('add_social_link')"></span></button>
+                    </div>
+                    <div class="space-y-4">
+                        <template x-for="(link, index) in socialLinks" :key="link.id || index">
+                            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 relative group flex flex-col md:flex-row md:items-center gap-4">
+                                <button @click="deleteSocialLink(index)" class="absolute top-3 right-3 text-red-400 hover:text-red-500 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash"></i></button>
+                                <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 pr-12">
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('platform_bn')"></label><input type="text" x-model="link.platform_name_bn" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('platform_en')"></label><input type="text" x-model="link.platform_name" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('url')"></label><input type="url" x-model="link.url" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('icon_class')"></label><input type="text" x-model="link.icon_class" placeholder="fa-brands fa-facebook" class="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('color')"></label><input type="color" x-model="link.color" class="w-16 h-10 border rounded-lg dark:bg-slate-700"></div>
+                                    <div><label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" x-text="t('icon_image')"></label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="file" accept="image/*" @change="uploadSocialIcon($event, link)" class="text-xs file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:font-bold file:bg-brand-blue/10 dark:file:bg-brand-gold/10 file:text-brand-blue dark:file:text-brand-gold cursor-pointer">
+                                            <span x-show="link.icon_image" class="text-xs text-emerald-500"><i class="fa-solid fa-check-circle"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-400" x-text="t('sort')"></span>
+                                    <input type="number" x-model="link.sort_order" class="w-16 border rounded px-2 py-1 text-xs dark:bg-slate-700">
+                                    <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="link.status" class="w-4 h-4 text-brand-blue dark:text-brand-gold rounded"><span class="ml-1 text-xs" x-text="t('active')"></span></label>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="socialLinks.length===0"><div class="text-center text-slate-500 py-10 font-bold" x-text="t('no_social_links')"></div></template>
+                    </div>
+                </div>
+
+                <!-- ==================== SETTINGS ==================== -->
+                <div x-show="activeTab === 'settings'" x-cloak x-transition>
+                    <h1 class="text-3xl font-black text-slate-800 dark:text-white mb-8 border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('settings')"></h1>
+
+                    <!-- Branding -->
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6 h-fit">
+                        <h2 class="font-black text-xl border-b border-slate-100 dark:border-slate-700 pb-3"><i class="fa-solid fa-paint-roller text-brand-blue dark:text-brand-gold mr-2"></i> <span x-text="t('branding')"></span></h2>
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-400 mb-4" x-text="t('logo')"></label>
+                            <div class="flex items-center space-x-6">
+                                <div class="w-24 h-24 rounded-full border-4 border-white dark:border-slate-600 shadow-lg bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 relative group">
+                                    <img x-show="data.site.logo" :src="'../' + data.site.logo" class="w-full h-full object-cover">
+                                    <i x-show="!data.site.logo" class="fa-solid fa-image text-slate-300 dark:text-slate-600 text-3xl"></i>
+                                    <label class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                        <i class="fa-solid fa-camera text-white text-xl"></i>
+                                        <input type="file" accept="image/*" @change="uploadFile($event, data.site, 'logo')" class="hidden">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-400 mb-2" x-text="t('phone')"></label><input type="text" x-model="data.site.phone" class="w-full border rounded-xl px-4 py-3 font-bold dark:bg-slate-700"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-400 mb-2" x-text="t('email')"></label><input type="text" x-model="data.site.email" class="w-full border rounded-xl px-4 py-3 font-bold dark:bg-slate-700"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-400 mb-2" x-text="t('address_bn')"></label><textarea x-model="data.site.address" rows="2" class="w-full border rounded-xl px-4 py-3 font-bold dark:bg-slate-700 resize-none"></textarea></div>
+                        <div><label class="block text-sm font-bold text-slate-700 dark:text-slate-400 mb-2" x-text="t('address_en')"></label><textarea x-model="data.site.address_en" rows="2" class="w-full border rounded-xl px-4 py-3 font-bold dark:bg-slate-700 resize-none"></textarea></div>
+                    </div>
+
+                    <!-- Typography -->
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6 h-fit mt-8">
+                        <h2 class="font-black text-xl border-b border-slate-100 dark:border-slate-700 pb-3"><i class="fa-solid fa-font text-brand-blue dark:text-brand-gold mr-2"></i> <span x-text="t('typography')"></span></h2>
+                        <div>
+                            <label class="flex justify-between items-center text-sm font-black text-slate-700 dark:text-slate-300 mb-4">
+                                <span x-text="t('font_size')"></span>
+                                <span class="text-white bg-brand-blue dark:bg-brand-gold dark:text-slate-900 px-3 py-1 rounded-lg font-black shadow-sm" x-text="data.site.font_size + ' px'"></span>
+                            </label>
+                            <input type="range" min="14" max="22" step="1" x-model="data.site.font_size" class="w-full h-3 bg-blue-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-blue dark:accent-brand-gold">
+                        </div>
+                        <div class="pt-5 border-t border-blue-200 dark:border-slate-700">
+                            <label class="block text-sm font-black text-slate-700 dark:text-slate-300 mb-3" x-text="t('custom_font')"></label>
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                <input type="file" accept=".ttf,.woff,.woff2" @change="uploadFile($event, data.site, 'custom_font')" class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-3 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:font-bold file:bg-white dark:file:bg-slate-800 file:text-brand-blue dark:file:text-brand-gold file:shadow-sm cursor-pointer">
+                                <button x-show="data.site.custom_font" @click="data.site.custom_font = ''" class="px-5 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold shadow-sm whitespace-nowrap"><i class="fa-solid fa-trash mr-1"></i> <span x-text="t('remove')"></span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Animation Controls -->
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6 h-fit mt-8">
+                        <h2 class="font-black text-xl border-b border-slate-100 dark:border-slate-700 pb-3"><i class="fa-solid fa-sliders-h text-brand-blue dark:text-brand-gold mr-2"></i> <span x-text="t('animation_controls')"></span></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" x-text="t('marquee_speed')"></label>
+                                <div class="flex items-center gap-4">
+                                    <input type="range" min="5" max="60" step="1" x-model="data.site.marquee_speed" class="flex-1 h-2 bg-blue-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-blue dark:accent-brand-gold">
+                                    <span class="text-sm font-bold bg-brand-blue dark:bg-brand-gold dark:text-slate-900 text-white px-3 py-1 rounded-lg" x-text="data.site.marquee_speed + 's'"></span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1" x-text="t('marquee_speed_desc')"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" x-text="t('popup_delay')"></label>
+                                <div class="flex items-center gap-4">
+                                    <input type="range" min="1000" max="8000" step="500" x-model="data.site.popup_animation_delay" class="flex-1 h-2 bg-blue-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-blue dark:accent-brand-gold">
+                                    <span class="text-sm font-bold bg-brand-blue dark:bg-brand-gold dark:text-slate-900 text-white px-3 py-1 rounded-lg" x-text="data.site.popup_animation_delay + 'ms'"></span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1" x-text="t('popup_delay_desc')"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Popup Management -->
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6 h-fit mt-8">
+                        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <h2 class="font-black text-xl"><i class="fa-solid fa-window-maximize text-brand-blue dark:text-brand-gold mr-2"></i> <span x-text="t('popup_management')"></span></h2>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" x-model="data.site.popup_enabled" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 -mt-2" x-text="t('popup_enabled_desc')"></p>
+                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <input type="file" accept="image/*" @change="uploadPopupImage($event)" class="block w-full sm:w-auto text-sm text-slate-500 dark:text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-brand-blue/10 dark:file:bg-brand-gold/10 file:text-brand-blue dark:file:text-brand-gold cursor-pointer">
+                            <span class="text-xs text-slate-400" x-text="t('popup_add_hint')"></span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                            <template x-for="(img, idx) in popupImages" :key="idx">
+                                <div class="relative group bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600">
+                                    <img :src="'../' + img" class="w-full h-32 object-cover">
+                                    <button @click="removePopupImage(idx)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"><i class="fa-solid fa-xmark"></i></button>
+                                    <div class="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full" x-text="idx+1"></div>
+                                </div>
+                            </template>
+                            <template x-if="popupImages.length===0"><div class="col-span-full text-center text-slate-500 py-6 text-sm" x-text="t('no_popup_images')"></div></template>
+                        </div>
+                    </div>
+
+                    <!-- Admission Control -->
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6 h-fit mt-8">
+                        <h2 class="font-black text-xl border-b border-slate-100 dark:border-slate-700 pb-3"><i class="fa-solid fa-door-open text-brand-blue dark:text-brand-gold mr-2"></i> <span x-text="t('admission_control')"></span></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div><div class="flex items-center justify-between"><span class="font-bold" x-text="t('master_admission')"></span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" x-model="data.site.master_admission" class="sr-only peer"><div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div></label></div></div>
+                            <div><div class="flex items-center justify-between"><span class="font-bold" x-text="t('diploma_admission')"></span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" x-model="data.site.diploma_admission" class="sr-only peer"><div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div></label></div></div>
+                            <div><div class="flex items-center justify-between"><span class="font-bold" x-text="t('nsda_admission')"></span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" x-model="data.site.nsda_admission" class="sr-only peer"><div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div></label></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Scraper Settings -->
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6 h-fit mt-8">
+                        <h2 class="font-black text-xl border-b border-slate-100 dark:border-slate-700 pb-3"><i class="fa-solid fa-robot text-brand-blue dark:text-brand-gold mr-2"></i> <span x-text="t('result_verification_settings')"></span></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div><label class="block text-sm font-bold" x-text="t('min_year')"></label><input type="number" x-model="data.scraper.eligibility.min_year" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></div>
+                            <div><label class="block text-sm font-bold" x-text="t('max_year')"></label><input type="number" x-model="data.scraper.eligibility.max_year" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></div>
+                            <div><label class="block text-sm font-bold" x-text="t('min_gpa')"></label><input type="number" step="0.01" x-model="data.scraper.eligibility.min_gpa" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"></div>
+                            <div><label class="block text-sm font-bold" x-text="t('gpa_operator')"></label><select x-model="data.scraper.eligibility.gpa_operator" class="w-full border rounded-xl px-4 py-3 dark:bg-slate-700"><option value=">=">≥</option><option value=">">></option></select></div>
+                            <div class="col-span-2 flex items-center gap-4">
+                                <label class="flex items-center cursor-pointer"><input type="checkbox" x-model="data.scraper.eligibility.admission_active" class="w-5 h-5 text-brand-blue dark:text-brand-gold rounded border-slate-300"><span class="ml-2 text-sm font-bold" x-text="t('admission_active')"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== CLEANUP ==================== -->
+                <div x-show="activeTab === 'cleanup'" x-cloak x-transition>
+                    <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white mb-8 border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('cleanup')"></h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            <h3 class="font-black text-lg mb-3"><i class="fa-solid fa-trash-can text-red-500 mr-2"></i> <span x-text="t('cleanup_options')"></span></h3>
+                            <div class="space-y-3">
+                                <button @click="runCleanup('old_admissions')" class="w-full px-4 py-3 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl text-sm font-bold text-red-600 dark:text-red-400 transition flex items-center justify-between">
+                                    <span x-text="t('cleanup_old_admissions')"></span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                                <button @click="runCleanup('duplicate_notices')" class="w-full px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 rounded-xl text-sm font-bold text-yellow-600 dark:text-yellow-400 transition flex items-center justify-between">
+                                    <span x-text="t('cleanup_duplicate_notices')"></span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                                <button @click="runCleanup('orphan_attachments')" class="w-full px-4 py-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400 transition flex items-center justify-between">
+                                    <span x-text="t('cleanup_orphan_attachments')"></span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                                <button @click="runCleanup('all')" class="w-full px-4 py-3 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-xl text-sm font-bold text-red-700 dark:text-red-300 transition flex items-center justify-between">
+                                    <span x-text="t('cleanup_all')"></span>
+                                    <i class="fa-solid fa-bolt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            <h3 class="font-black text-lg mb-3"><i class="fa-solid fa-circle-info text-brand-blue dark:text-brand-gold mr-2"></i> <span x-text="t('cleanup_info')"></span></h3>
+                            <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                                <li>• <span x-text="t('cleanup_info_old')"></span></li>
+                                <li>• <span x-text="t('cleanup_info_duplicate')"></span></li>
+                                <li>• <span x-text="t('cleanup_info_orphan')"></span></li>
+                                <li class="text-xs text-slate-500 mt-3"><i class="fa-solid fa-shield-halved mr-1"></i> <span x-text="t('cleanup_safe')"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== USERS ==================== -->
+                <div x-show="activeTab === 'users'" x-cloak x-transition>
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-8 gap-4">
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-3 inline-block" x-text="t('users')"></h1>
+                        <button @click="openAddUser()" class="px-5 py-2.5 bg-brand-blue dark:bg-brand-gold dark:text-slate-900 text-white rounded-xl font-bold shadow-lg hover:scale-105 transition-all text-sm"><i class="fa-solid fa-user-plus mr-2"></i> <span x-text="t('add_user')"></span></button>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-slate-900/50">
+                                    <tr><th class="px-4 py-3 font-black" x-text="t('username')"></th><th class="px-4 py-3 font-black" x-text="t('full_name')"></th><th class="px-4 py-3 font-black" x-text="t('email')"></th><th class="px-4 py-3 font-black" x-text="t('role')"></th><th class="px-4 py-3 font-black" x-text="t('status')"></th><th class="px-4 py-3 font-black text-center" x-text="t('actions')"></th></tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                                    <template x-for="user in users" :key="user.id">
+                                        <tr>
+                                            <td class="px-4 py-3" x-text="user.username"></td>
+                                            <td class="px-4 py-3" x-text="user.full_name"></td>
+                                            <td class="px-4 py-3" x-text="user.email"></td>
+                                            <td class="px-4 py-3"><span class="px-2 py-1 text-[10px] font-black rounded-lg" :class="user.role === 'admin' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'" x-text="user.role"></span></td>
+                                            <td class="px-4 py-3"><span :class="user.status === 'active' ? 'text-emerald-500' : 'text-red-500'" x-text="user.status"></span></td>
+                                            <td class="px-4 py-3 text-center">
+                                                <button @click="toggleUserStatus(user.id)" class="px-3 py-1 text-xs font-bold rounded-lg" :class="user.status === 'active' ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'" x-text="user.status === 'active' ? t('deactivate') : t('activate')"></button>
+                                                <button @click="deleteUser(user.id)" class="ml-2 px-3 py-1 text-xs font-bold rounded-lg bg-red-100 text-red-600 hover:bg-red-200" x-text="t('delete')"></button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Add User Modal -->
+                    <div x-show="addUserModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center px-4" x-cloak>
+                        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="addUserModalOpen = false"></div>
+                        <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl shadow-2xl z-10 p-6 modal-content">
+                            <h3 class="text-xl font-black mb-4" x-text="t('add_user')"></h3>
+                            <div class="space-y-3">
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('username')"></label><input type="text" x-model="newUser.username" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('full_name')"></label><input type="text" x-model="newUser.full_name" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('email')"></label><input type="email" x-model="newUser.email" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('password')"></label><input type="password" x-model="newUser.password" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700"></div>
+                                <div><label class="block text-sm font-bold mb-1" x-text="t('role')"></label>
+                                    <select x-model="newUser.role" class="w-full border rounded-xl px-4 py-2 dark:bg-slate-700">
+                                        <option value="admin" x-text="t('admin')"></option>
+                                        <option value="editor" x-text="t('editor')"></option>
+                                        <option value="viewer" x-text="t('viewer')"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 mt-6">
+                                <button @click="saveUser()" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl font-bold hover:bg-emerald-700" x-text="t('add')"></button>
+                                <button @click="addUserModalOpen = false" class="admin-btn admin-btn-muted flex-1" x-text="t('cancel')"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('adminApp', () => ({
+                // ======================== STATE ========================
+                sidebarOpen: false,
+                darkMode: false,
+                activeTab: 'dashboard',
+                isLoading: true,
+                isSaving: false,
+                isDirty: false,
+                health: {status:'checking', tables:{}},
+                currentLang: 'bn',
+                translations: {},
+
+                // Admission filter
+                admissionFilter: 'all',
+
+                // Edit modal
+                editModalOpen: false,
+                editForm: { id: '', phone: '', address: '', course_name: '' },
+
+                // Gallery
+                galleryItems: [],
+                attachmentModalOpen: false,
+                currentGalleryItem: null,
+                currentAttachments: [],
+                eventMedia: [],
+                pendingEventMedia: [],
+
+                // Quotes
+                quotes: [],
+
+                // Content
+                content: {
+                    about_bn: '', about_en: '', about_status: true,
+                    mission_bn: '', mission_en: '', vision_bn: '', vision_en: '', mv_status: true,
+                    objectives_bn: '', objectives_en: '', objectives_status: true
+                },
+                faqs: [],
+
+                // Social
+                socialLinks: [],
+
+                // Notice categories
+                noticeCategories: [],
+
+                // Popup
+                popupImages: [],
+
+                // Events/News
+                eventType: 'event',
+                activeSubTab: 'list',
+                editorOpen: false,
+                editingEvent: null,
+                eventForm: {
+                    id: null, type: 'event', date: '',
+                    category_bn: '', category_en: '',
+                    title_bn: '', title_en: '',
+                    description_bn: '', description_en: '',
+                    content_bn: '', content_en: '',
+                    file_url: '',
+                    showInMarquee: 0, status: 1
+                },
+
+                // Users
+                users: [],
+                addUserModalOpen: false,
+                newUser: { username: '', full_name: '', email: '', password: '', role: 'editor' },
+
+                // Main data
+                data: {
+                    site: {
+                        font_size: '16', custom_font: '', logo: '', phone: '', email: '',
+                        address: '', address_en: '',
+                        master_admission: true, diploma_admission: true, nsda_admission: true,
+                        marquee_speed: 30, popup_animation_delay: 3000,
+                        popup_enabled: false, popup_images: []
+                    },
+                    scraper: { eligibility: { min_year: 2022, max_year: 2026, min_gpa: 2.00, gpa_operator: '>=', admission_active: true } },
+                    messages: [], notices: [], events: [], news: [], teachers: [], courses: [], admissions: []
+                },
+
+                // ======================== COMPUTED ========================
+                get totalPending() {
+                    return this.data.admissions ? this.data.admissions.filter(a => a.status === 'pending').length : 0;
+                },
+                get filteredAdmissions() {
+                    if (this.admissionFilter === 'all') return this.data.admissions || [];
+                    return (this.data.admissions || []).filter(a => a.admission_type === this.admissionFilter);
+                },
+
+                // ======================== TRANSLATION ========================
+                t(key) {
+                    return this.translations[key] || key;
+                },
+
+                async loadTranslations(lang) {
+                    try {
+                        const res = await fetch(`../languages/${lang}.json?t=${Date.now()}`);
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        this.translations = await res.json();
+                    } catch (e) {
+                        console.warn('Translation fallback', e);
+                        this.translations = {};
+                    }
+                },
+
+                // ======================== INIT ========================
+                init() {
+                    // Dashboard is intentionally dark-only.
+                    this.darkMode = true;
+                    document.documentElement.classList.add('dark');
+
+                    // Mark changes globally so only one contextual save action is shown.
+                    document.addEventListener('input', (e) => { if (e.target && e.target.matches('input, textarea, select')) this.isDirty = true; }, true);
+                    document.addEventListener('change', (e) => { if (e.target && e.target.matches('input, textarea, select')) this.isDirty = true; }, true);
+
+                    // Language
+                    const savedLang = localStorage.getItem('aspi_lang');
+                    this.currentLang = ['bn','en'].includes(savedLang) ? savedLang : (navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'bn');
+                    document.documentElement.lang = this.currentLang;
+                    this.loadTranslations(this.currentLang).then(() => { document.title = this.t('admin_title'); });
+
+                    // Load all data
+                    this.loadHealth();
+                    this.loadData();
+                    this.loadGallery();
+                    this.loadQuotes();
+                    this.loadContent();
+                    this.loadFaqs();
+                    this.loadSocialLinks();
+                    this.loadNoticeCategories();
+                    this.loadUsers();
+
+                    // Auto-refresh
+                    setInterval(() => {
+                        this.loadData();
+                        this.loadGallery();
+                        this.loadQuotes();
+                        this.loadContent();
+                        this.loadFaqs();
+                        this.loadSocialLinks();
+                        this.loadNoticeCategories();
+                        this.loadUsers();
+                    }, 300000);
+                },
+
+                toggleTheme() {
+                    this.darkMode = true;
+                    document.documentElement.classList.add('dark');
+                },
+
+                switchLanguage(lang) {
+                    if (lang === this.currentLang) return;
+                    if (this.isDirty && !confirm(this.t('confirm_unsaved') || (this.currentLang === 'bn' ? 'অসংরক্ষিত পরিবর্তন আছে। ভাষা পরিবর্তন করলে এগুলো হারিয়ে যাবে। চালিয়ে যাবেন?' : 'You have unsaved changes. Switching language will discard them. Continue?'))) return;
+                    this.currentLang = ['bn','en'].includes(lang) ? lang : 'bn';
+                    document.documentElement.lang = this.currentLang;
+                    localStorage.setItem('aspi_lang', this.currentLang);
+                    this.loadTranslations(this.currentLang).then(() => { document.title = this.t('admin_title'); });
+                    this.loadData();
+                    this.loadGallery();
+                    this.loadQuotes();
+                    this.loadContent();
+                    this.loadFaqs();
+                    this.loadSocialLinks();
+                    this.loadNoticeCategories();
+                },
+
+                logout() {
+                    if (confirm(this.t('confirm_logout'))) {
+                        window.location.href = 'logout.php';
+                    }
+                },
+
+                // ======================== DATA LOADING ========================
+
+                async loadHealth() {
+                    try {
+                        const res = await fetch('../api.php?action=dashboard_health&t=' + Date.now(), {cache:'no-store'});
+                        this.health = await res.json();
+                    } catch(e) { this.health = {status:'error',tables:{}}; }
+                },
+
+                async loadData() {
+                    this.isLoading = true;
+                    try {
+                        const lang = this.currentLang || 'bn';
+                        const res = await fetch(`../api.php?admin=1&lang=${lang}&t=${Date.now()}`, { cache: 'no-store' });
+                        const json = await res.json();
+                        if (!json.error) {
+                            this.data = json;
+                            // Ensure settings
+                            if (this.data.site.master_admission === undefined) this.data.site.master_admission = true;
+                            if (this.data.site.diploma_admission === undefined) this.data.site.diploma_admission = true;
+                            if (this.data.site.nsda_admission === undefined) this.data.site.nsda_admission = true;
+                            if (!this.data.site.address_en) this.data.site.address_en = '';
+                            if (!this.data.site.marquee_speed) this.data.site.marquee_speed = 30;
+                            if (!this.data.site.popup_animation_delay) this.data.site.popup_animation_delay = 3000;
+                            if (this.data.site.popup_images) {
+                                this.popupImages = typeof this.data.site.popup_images === 'string' ? JSON.parse(this.data.site.popup_images) : this.data.site.popup_images;
+                            } else {
+                                this.popupImages = [];
+                            }
+                            if (!this.data.scraper) this.data.scraper = { eligibility: {} };
+                        }
+                    } catch (e) { console.error('Data load error', e); }
+                    this.isLoading = false;
+                },
+
+                async loadGallery() {
+                    try {
+                        const lang = this.currentLang || 'bn';
+                        const res = await fetch(`../api.php?action=get_gallery_items&admin=1&lang=${lang}&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.gallery) this.galleryItems = json.gallery;
+                    } catch (e) { console.error('Gallery load error', e); }
+                },
+
+                async loadQuotes() {
+                    try {
+                        const lang = this.currentLang || 'bn';
+                        const res = await fetch(`../api.php?action=get_quotes&admin=1&lang=${lang}&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.quotes) this.quotes = json.quotes;
+                    } catch (e) { console.error('Quotes load error', e); }
+                },
+
+                async loadContent() {
+                    try {
+                        const lang = this.currentLang || 'bn';
+                        const res = await fetch(`../api.php?action=get_content&admin=1&lang=${lang}&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.content) this.content = json.content;
+                    } catch (e) { console.error('Content load error', e); }
+                },
+
+                async loadFaqs() {
+                    try {
+                        const lang = this.currentLang || 'bn';
+                        const res = await fetch(`../api.php?action=get_faqs&admin=1&lang=${lang}&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.faqs) this.faqs = json.faqs;
+                    } catch (e) { console.error('FAQs load error', e); }
+                },
+
+                async loadSocialLinks() {
+                    try {
+                        const res = await fetch('../api.php?action=get_social_links&admin=1&t=' + Date.now());
+                        const json = await res.json();
+                        if (json.social_links) this.socialLinks = json.social_links;
+                    } catch (e) { console.error('Social links load error', e); }
+                },
+
+                async loadNoticeCategories() {
+                    try {
+                        const lang = this.currentLang || 'bn';
+                        const res = await fetch(`../api.php?action=get_notice_categories&admin=1&lang=${lang}&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.categories) this.noticeCategories = json.categories;
+                    } catch (e) { console.error('Notice categories load error', e); }
+                },
+
+                async loadUsers() {
+                    try {
+                        const res = await fetch('../api.php?action=get_users&t=' + Date.now());
+                        const json = await res.json();
+                        if (json.users) this.users = json.users;
+                    } catch (e) { console.error('Users load error', e); }
+                },
+
+                // ======================== SAVE DATA ========================
+                async saveData() {
+                    if (this.isSaving) return;
+                    this.isSaving = true;
+                    this.isLoading = true;
+                    try {
+                        const payload = {
+                            site: {
+                                ...this.data.site,
+                                popup_images: this.popupImages
+                            },
+                            scraper: this.data.scraper,
+                            messages: this.data.messages,
+                            notices: this.data.notices,
+                            events: this.data.events,
+                            news: this.data.news,
+                            teachers: this.data.teachers,
+                            courses: this.data.courses,
+                            quotes: this.quotes,
+                            social_links: this.socialLinks,
+                            notice_categories: this.noticeCategories,
+                            content: this.content,
+                            faqs: this.faqs,
+                            gallery: this.galleryItems
+                        };
+                        const res = await fetch('../api.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            this.isDirty = false;
+                            alert(this.t('save_success'));
+                            this.loadData();
+                            this.loadGallery();
+                            this.loadQuotes();
+                            this.loadContent();
+                            this.loadFaqs();
+                            this.loadSocialLinks();
+                            this.loadNoticeCategories();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isSaving = false;
+                    this.isLoading = false;
+                },
+
+                // ======================== ADMISSION SETTINGS ========================
+                async saveAdmissionSettings() {
+                    this.isLoading = true;
+                    try {
+                        const payload = {
+                            master_admission: this.data.site.master_admission ? 1 : 0,
+                            diploma_admission: this.data.site.diploma_admission ? 1 : 0,
+                            nsda_admission: this.data.site.nsda_admission ? 1 : 0
+                        };
+                        const res = await fetch('../api.php?action=update_admission_settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            this.isDirty = false;
+                            alert(this.t('settings_saved'));
+                            this.loadData();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== POPUP MANAGEMENT ========================
+                async uploadPopupImage(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=upload', { method: 'POST', body: fd });
+                        const result = await res.json();
+                        if (result.url) {
+                            this.popupImages.push(result.url);
+                            this.data.site.popup_images = this.popupImages;
+                            await this.savePopupSettings();
+                            alert(this.t('upload_success'));
+                        } else {
+                            alert(this.t('upload_failed'));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                async removePopupImage(index) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.popupImages.splice(index, 1);
+                    this.data.site.popup_images = this.popupImages;
+                    await this.savePopupSettings();
+                },
+
+                async savePopupSettings() {
+                    try {
+                        const payload = {
+                            popup_enabled: this.data.site.popup_enabled ? 1 : 0,
+                            popup_images: this.popupImages
+                        };
+                        const res = await fetch('../api.php?action=update_settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await res.json();
+                        if (result.status !== 'success') {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                },
+
+                // ======================== UPLOAD FILE ========================
+                async uploadFile(event, objRef, propertyName) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    this.isLoading = true;
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    if (propertyName === 'custom_font') fd.append('upload_type', 'font');
+                    try {
+                        const res = await fetch('../api.php?action=upload', { method: 'POST', body: fd });
+                        const result = await res.json();
+                        if (result.url) {
+                            objRef[propertyName] = result.url;
+                            this.isDirty = true;
+                            alert(this.t('upload_success'));
+                        } else {
+                            alert(this.t('upload_failed') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== ADMISSIONS ACTIONS ========================
+                async updateStatus(id, status) {
+                    if (!confirm(this.t('confirm_status_change'))) return;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=update_admission_status', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id, status, note: '' })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            this.isDirty = false;
+                            alert(this.t('status_updated'));
+                            this.loadData();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                editAdmission(app) {
+                    this.editForm = { id: app.id, phone: app.phone, address: app.address, course_name: app.course_name };
+                    this.editModalOpen = true;
+                },
+
+                async saveEdit() {
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=edit_admission', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.editForm)
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            this.isDirty = false;
+                            alert(this.t('save_success'));
+                            this.editModalOpen = false;
+                            this.loadData();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== GALLERY ========================
+                openGalleryUpload() {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const title_bn = prompt(this.t('title_bn') + ':');
+                        const title_en = prompt(this.t('title_en') + ':');
+                        const fd = new FormData();
+                        fd.append('file', file);
+                        fd.append('title_bn', title_bn || '');
+                        fd.append('title_en', title_en || '');
+                        this.isLoading = true;
+                        try {
+                            const res = await fetch('../api.php?action=upload_gallery_item', { method: 'POST', body: fd });
+                            const result = await res.json();
+                            if (result.status === 'success') {
+                                alert(this.t('upload_success'));
+                                this.loadGallery();
+                            } else {
+                                alert(this.t('upload_failed') + ': ' + (result.error || ''));
+                            }
+                        } catch (e) { alert(this.t('network_error')); }
+                        this.isLoading = false;
+                    };
+                    input.click();
+                },
+
+                async deleteGalleryItem(id) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=delete_gallery_item', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('delete_success'));
+                            this.loadGallery();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                async openAttachments(item) {
+                    this.currentGalleryItem = item;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch(`../api.php?action=get_gallery_attachments&id=${item.id}&t=${Date.now()}`);
+                        const json = await res.json();
+                        if (json.attachments) this.currentAttachments = json.attachments;
+                        this.attachmentModalOpen = true;
+                    } catch (e) { console.error(e); }
+                    this.isLoading = false;
+                },
+
+                async uploadAttachment(event) {
+                    const file = event.target.files[0];
+                    if (!file || !this.currentGalleryItem) return;
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('gallery_id', this.currentGalleryItem.id);
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=upload_gallery_attachment', { method: 'POST', body: fd });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('upload_success'));
+                            this.openAttachments(this.currentGalleryItem);
+                        } else {
+                            alert(this.t('upload_failed') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                async deleteAttachment(id) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=delete_gallery_attachment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('delete_success'));
+                            this.openAttachments(this.currentGalleryItem);
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== EVENTS & NEWS ========================
+                assetUrl(path) {
+                    if (!path) return '';
+                    if (/^(https?:)?\/\//i.test(path) || path.startsWith('/')) return path;
+                    return '../' + path.replace(/^\.\//, '');
+                },
+
+                async loadEventMedia(id) {
+                    if (!id) { this.eventMedia = []; return; }
+                    try {
+                        const res = await fetch(`../api.php?action=get_event_media&id=${id}&t=${Date.now()}`);
+                        const json = await res.json();
+                        this.eventMedia = json.media || [];
+                    } catch (e) { this.eventMedia = []; }
+                },
+
+                stageEventMedia(event) {
+                    const files = Array.from(event.target.files || []);
+                    this.pendingEventMedia = files.filter(file => /^(image\/(jpeg|png|gif|webp)|video\/(mp4|webm|ogg))$/i.test(file.type));
+                    event.target.value = '';
+                },
+
+                async uploadPendingEventMedia(eventId) {
+                    if (!eventId || !this.pendingEventMedia.length) return true;
+                    const fd = new FormData();
+                    fd.append('event_id', eventId);
+                    this.pendingEventMedia.forEach(file => fd.append('files[]', file));
+                    try {
+                        const res = await fetch('../api.php?action=upload_event_media', { method: 'POST', body: fd });
+                        const result = await res.json();
+                        if (result.status !== 'success') {
+                            alert(this.t('upload_failed') + ': ' + (result.error || ''));
+                            return false;
+                        }
+                        this.pendingEventMedia = [];
+                        await this.loadEventMedia(eventId);
+                        return true;
+                    } catch (e) {
+                        alert(this.t('network_error'));
+                        return false;
+                    }
+                },
+
+                async deleteEventMedia(id) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    try {
+                        const res = await fetch('../api.php?action=delete_event_media', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') await this.loadEventMedia(this.eventForm.id);
+                        else alert(this.t('save_error') + ': ' + (result.error || ''));
+                    } catch (e) { alert(this.t('network_error')); }
+                },
+
+                openEventEditor(item = null) {
+                    this.pendingEventMedia = [];
+                    if (item) {
+                        this.eventForm = { ...item };
+                        this.editingEvent = true;
+                        this.loadEventMedia(item.id);
+                    } else {
+                        this.eventForm = {
+                            id: null,
+                            type: this.eventType,
+                            date: new Date().toISOString().split('T')[0],
+                            category_bn: '', category_en: '',
+                            title_bn: '', title_en: '',
+                            description_bn: '', description_en: '',
+                            content_bn: '', content_en: '',
+                            file_url: '',
+                            showInMarquee: 0,
+                            status: 1
+                        };
+                        this.editingEvent = false;
+                        this.eventMedia = [];
+                    }
+                    this.editorOpen = true;
+                },
+
+                editEvent(item) {
+                    this.openEventEditor(item);
+                },
+
+                async saveEvent() {
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=save_event', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.eventForm)
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            this.isDirty = false;
+                            const savedId = result.id || this.eventForm.id;
+                            if (savedId) {
+                                this.eventForm.id = savedId;
+                                await this.uploadPendingEventMedia(savedId);
+                                await this.loadEventMedia(savedId);
+                            }
+                            alert(this.t('save_success'));
+                            this.editorOpen = false;
+                            this.loadData();
+                        } else {
+                            alert(this.t('save_error') + ': ' + result.error);
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                async deleteEvent(id) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=delete_event', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('delete_success'));
+                            this.loadData();
+                        } else {
+                            alert(this.t('save_error'));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                async uploadFeaturedImage(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=upload', { method: 'POST', body: fd });
+                        const result = await res.json();
+                        if (result.url) {
+                            this.eventForm.file_url = result.url;
+                            this.isDirty = true;
+                            alert(this.t('upload_success'));
+                        } else {
+                            alert(this.t('upload_failed'));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== NOTICES ========================
+                addNotice() {
+                    const today = new Date().toISOString().split('T')[0];
+                    this.isDirty = true;
+                    this.data.notices.unshift({
+                        id: Date.now(),
+                        date: today,
+                        date_bn: '', date_en: '',
+                        category_id: 0, sub_category_id: 0,
+                        title_bn: '', title_en: '',
+                        file_url: '',
+                        isNew: true,
+                        showInMarquee: false
+                    });
+                },
+
+                deleteItem(type, index) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.data[type].splice(index, 1);
+                    this.isDirty = true;
+                },
+
+                // ======================== NOTICE CATEGORIES ========================
+                addNoticeCategory() {
+                    this.isDirty = true;
+                    this.noticeCategories.unshift({
+                        id: Date.now(),
+                        parent_id: 0,
+                        name_bn: '', name_en: '',
+                        slug: '',
+                        status: 1
+                    });
+                },
+
+                deleteNoticeCategory(id) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.noticeCategories = this.noticeCategories.filter(c => c.id !== id);
+                    this.isDirty = true;
+                },
+
+                // ======================== QUOTES ========================
+                addQuote() {
+                    this.isDirty = true;
+                    this.quotes.unshift({
+                        id: Date.now(),
+                        name_bn: '', name_en: '',
+                        designation_bn: '', designation_en: '',
+                        quote_bn: '', quote_en: '',
+                        image_url: '',
+                        status: true,
+                        sort_order: 0
+                    });
+                },
+
+                deleteQuote(index) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.quotes.splice(index, 1);
+                    this.isDirty = true;
+                },
+
+                // ======================== SOCIAL LINKS ========================
+                addSocialLink() {
+                    this.isDirty = true;
+                    this.socialLinks.unshift({
+                        id: Date.now(),
+                        platform_name: '', platform_name_bn: '',
+                        icon_class: 'fa-brands fa-link',
+                        icon_image: '',
+                        url: '#',
+                        color: '#000000',
+                        sort_order: 0,
+                        status: true
+                    });
+                },
+
+                deleteSocialLink(index) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.socialLinks.splice(index, 1);
+                    this.isDirty = true;
+                },
+
+                async uploadSocialIcon(event, link) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=upload', { method: 'POST', body: fd });
+                        const result = await res.json();
+                        if (result.url) {
+                            link.icon_image = result.url;
+                            this.isDirty = true;
+                            alert(this.t('upload_success'));
+                        } else {
+                            alert(this.t('upload_failed'));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== FAQ ========================
+                addFaq() {
+                    this.isDirty = true;
+                    this.faqs.unshift({
+                        id: Date.now(),
+                        question_bn: '', question_en: '',
+                        answer_bn: '', answer_en: '',
+                        status: true,
+                        sort_order: 0
+                    });
+                },
+
+                deleteFaq(index) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.faqs.splice(index, 1);
+                    this.isDirty = true;
+                },
+
+                // ======================== CLEANUP ========================
+                async runCleanup(type) {
+                    if (!confirm(this.t('confirm_cleanup'))) return;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=cleanup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ type })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('cleanup_success'));
+                            this.loadData();
+                            this.loadGallery();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== USERS ========================
+                openAddUser() {
+                    this.newUser = { username: '', full_name: '', email: '', password: '', role: 'editor' };
+                    this.addUserModalOpen = true;
+                },
+
+                async saveUser() {
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=add_user', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newUser)
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            alert(this.t('user_added'));
+                            this.addUserModalOpen = false;
+                            this.loadUsers();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                async toggleUserStatus(id) {
+                    if (!confirm(this.t('confirm_status_change'))) return;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=toggle_user_status', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            this.loadUsers();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                async deleteUser(id) {
+                    if (!confirm(this.t('confirm_delete'))) return;
+                    this.isLoading = true;
+                    try {
+                        const res = await fetch('../api.php?action=delete_user', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id })
+                        });
+                        const result = await res.json();
+                        if (result.status === 'success') {
+                            this.loadUsers();
+                        } else {
+                            alert(this.t('save_error') + ': ' + (result.error || ''));
+                        }
+                    } catch (e) { alert(this.t('network_error')); }
+                    this.isLoading = false;
+                },
+
+                // ======================== TEACHERS, COURSES ADD ========================
+                addTeacher() {
+                    this.isDirty = true;
+                    this.data.teachers.unshift({
+                        id: Date.now(),
+                        name_bn: '', name_en: '',
+                        deg_bn: '', deg_en: '',
+                        dept_bn: '', dept_en: '',
+                        file_url: ''
+                    });
+                },
+
+                addCourse() {
+                    this.isDirty = true;
+                    this.data.courses.unshift({
+                        id: Date.now(),
+                        type: 'diploma',
+                        title_bn: '', title_en: '',
+                        level_bn: '', level_en: ''
+                    });
+                }
+            }));
+        });
+    </script>
+
+<script id="aspi-v10-button-classifier">
+document.addEventListener('DOMContentLoaded', function(){
+  const addWords = [
+    'add','create','new','যোগ','যুক্ত','নতুন','তৈরি','যোগ করুন','নতুন যোগ',
+    'faq যোগ','কোর্স যোগ','শিক্ষক যোগ','নোটিশ যোগ','ইভেন্ট যোগ','মিডিয়া যোগ',
+    'মিডিয়া যোগ','ক্যাটাগরি যোগ','উদ্ধৃতি যোগ'
+  ];
+  const dangerWords = ['delete','remove','মুছ','ডিলিট','বাদ'];
+  const successWords = ['save','update','সংরক্ষণ','সেভ','আপডেট'];
+  const neutralWords = ['cancel','close','বাতিল','বন্ধ'];
+
+  document.querySelectorAll('.aspi-dashboard-main button').forEach(function(btn){
+    const text = ((btn.innerText || '') + ' ' + (btn.getAttribute('aria-label') || '') + ' ' + (btn.title || '')).trim().toLowerCase();
+    if(!text) return;
+
+    if(addWords.some(w => text.includes(w))){
+      btn.classList.add('create-btn');
+      btn.dataset.actionRole = 'create';
+    } else if(dangerWords.some(w => text.includes(w))){
+      btn.dataset.actionRole = 'danger';
+      btn.style.background = '#dc2626';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'rgba(252,165,165,.34)';
+    } else if(successWords.some(w => text.includes(w))){
+      btn.dataset.actionRole = 'save';
+      btn.style.background = 'linear-gradient(135deg,#fde047,#f59e0b)';
+      btn.style.color = '#111827';
+      btn.style.borderColor = '#fef08a';
+    } else if(neutralWords.some(w => text.includes(w))){
+      btn.dataset.actionRole = 'neutral';
+      btn.style.background = '#334155';
+      btn.style.color = '#f8fafc';
+      btn.style.borderColor = 'rgba(148,163,184,.3)';
+    }
+  });
+});
+</script>
+
+</body>
+</html>
