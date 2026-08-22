@@ -1,2 +1,37 @@
 <?php
-require __DIR__ . '/public_html/index.html';
+declare(strict_types=1);
+$source = __DIR__ . '/public_html/index.html';
+$html = is_file($source) ? file_get_contents($source) : '';
+if ($html === false || $html === '') { http_response_code(500); exit('Website template unavailable'); }
+$committeeSection = <<<'HTML'
+<!-- ORGANIZATIONAL COMMITTEE -->
+<section id="organizational_committee" class="scroll-reveal" x-intersect="$el.classList.add('active')" data-aspi-committee-section>
+  <div class="text-center mb-12 sm:mb-16">
+    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-[#094f9d] border border-blue-100 font-black text-xs sm:text-sm"><i class="fa-solid fa-people-group"></i><span>সাংগঠনিক কমিটি / Organizational Committee</span></span>
+    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mt-4 mb-3">সাংগঠনিক কমিটির সদস্যবৃন্দ</h2>
+    <p class="text-slate-600 dark:text-slate-400 font-bold text-sm sm:text-lg">প্রতিষ্ঠানের সাংগঠনিক নেতৃত্ব ও দায়িত্বশীল সদস্যদের তালিকা</p>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8" data-aspi-committee-grid></div>
+  <div class="hidden text-center py-8 text-slate-500 font-bold" data-aspi-committee-empty>সাংগঠনিক কমিটির সদস্যদের তথ্য এখনো প্রকাশ করা হয়নি।</div>
+</section>
+HTML;
+$runtimeCss = <<<'CSS'
+<style id="aspi-production-runtime">
+:root{--aspi-blue:#094f9d;--aspi-gold:#facc15;--aspi-light-bg:#f7faff;--aspi-light-line:#dbe7f5}
+.header-control{color:var(--aspi-blue)!important;border:1px solid rgba(9,79,157,.22)!important;background:rgba(255,255,255,.9)!important}.dark .header-control{color:var(--aspi-gold)!important;background:rgba(15,23,42,.86)!important;border-color:rgba(250,204,21,.28)!important}.aspi-theme-toggle{color:var(--aspi-blue)!important;background:#fff!important;border-color:rgba(9,79,157,.22)!important}.dark .aspi-theme-toggle{color:var(--aspi-gold)!important;background:#0f172a!important;border-color:rgba(250,204,21,.28)!important}
+.mobile-menu{background:rgba(255,255,255,.98)!important;border-color:var(--aspi-light-line)!important}.mobile-menu a{color:#0f172a!important;background:rgba(9,79,157,.045)!important;border-color:var(--aspi-light-line)!important}.mobile-menu a:hover{background:rgba(9,79,157,.10)!important}.dark .mobile-menu{background:rgba(5,12,24,.98)!important;border-color:rgba(250,204,21,.16)!important}.dark .mobile-menu a{color:#f1f5f9!important;background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.08)!important}
+header .header-control,.lang-switch{color:var(--aspi-blue)!important}.dark header .header-control,.dark .lang-switch{color:var(--aspi-gold)!important}
+body:not(.dark){background:var(--aspi-light-bg)!important;color:#172033!important}body:not(.dark) .glass-card{background:rgba(255,255,255,.94)!important;border-color:var(--aspi-light-line)!important;box-shadow:0 14px 40px rgba(9,79,157,.08)!important}body:not(.dark) .glass-nav{background:rgba(255,255,255,.96)!important;border-bottom-color:var(--aspi-light-line)!important}body:not(.dark) .bg-gradient-anim{background:linear-gradient(135deg,#f8fbff,#eef5ff)!important}body:not(.dark) .mobile-lang-btn{color:var(--aspi-blue)!important;background:rgba(9,79,157,.05)!important;border-color:rgba(9,79,157,.16)!important}body:not(.dark) .founder-highlight{background:linear-gradient(135deg,#fff,#f2f7ff)!important;color:#172033!important;border:1px solid var(--aspi-light-line)}body:not(.dark) .founder-highlight .founder-cta{background:var(--aspi-blue)!important;color:#fff!important;box-shadow:0 12px 30px rgba(9,79,157,.22)!important}body:not(.dark) .marquee-container{background:linear-gradient(90deg,#163c69,#094f9d)!important}body:not(.dark) .marquee-container>div:first-child{background:var(--aspi-blue)!important;color:#fff!important}
+.aspi-committee-card{background:rgba(255,255,255,.94);border:1px solid #dbe7f5;box-shadow:0 12px 34px rgba(9,79,157,.08);border-radius:2rem;padding:1.5rem;text-align:center;transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease}.aspi-committee-card:hover{transform:translateY(-8px);box-shadow:0 22px 46px rgba(9,79,157,.14);border-color:rgba(9,79,157,.28)}.aspi-committee-photo{width:7rem;height:7rem;margin:0 auto 1rem;border-radius:999px;padding:.35rem;background:linear-gradient(135deg,#e8f1fb,#f6f9fd);border:1px solid #c9dced;overflow:hidden}.aspi-committee-photo>div{width:100%;height:100%;border-radius:999px;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}.aspi-committee-photo img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease}.aspi-committee-card:hover .aspi-committee-photo img{transform:scale(1.06)}.dark .aspi-committee-card{background:rgba(15,23,42,.72);border-color:rgba(148,163,184,.14);box-shadow:0 12px 34px rgba(0,0,0,.28)}.dark .aspi-committee-card:hover{border-color:rgba(250,204,21,.24);box-shadow:0 22px 46px rgba(0,0,0,.38)}.dark .aspi-committee-photo{background:linear-gradient(135deg,#1e293b,#0f172a);border-color:#334155}.dark .aspi-committee-photo>div{background:#0f172a}.aspi-committee-designation{display:inline-flex;margin-top:.5rem;padding:.35rem .7rem;border-radius:.65rem;background:rgba(9,79,157,.07);color:var(--aspi-blue);border:1px solid rgba(9,79,157,.12);font-weight:800;font-size:.78rem}.dark .aspi-committee-designation{background:rgba(250,204,21,.08);color:#fde68a;border-color:rgba(250,204,21,.15)}
+</style>
+CSS;
+$runtimeJs = <<<'JS'
+<script id="aspi-production-runtime-js">
+(function(){function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}function lang(){return document.documentElement.lang||localStorage.getItem('aspi_lang')||'bn'}function load(){fetch('committee.php?action=list&t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(j=>{const g=document.querySelector('[data-aspi-committee-grid]'),e=document.querySelector('[data-aspi-committee-empty]');if(!g||!e)return;const a=Array.isArray(j.committee)?j.committee:[];g.innerHTML='';if(!a.length){e.classList.remove('hidden');return}e.classList.add('hidden');a.forEach(m=>{const n=lang()==='en'?(m.name_en||m.name_bn||''):(m.name_bn||m.name_en||''),d=lang()==='en'?(m.designation_en||m.designation_bn||''):(m.designation_bn||m.designation_en||'');const c=document.createElement('article');c.className='aspi-committee-card group';c.innerHTML='<div class="aspi-committee-photo"><div>'+(m.image_url?'<img src="'+esc(m.image_url)+'" alt="" loading="lazy">':'<i class="fa-solid fa-user-tie text-3xl text-slate-300 dark:text-slate-600"></i>')+'</div></div><h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight">'+esc(n)+'</h3><span class="aspi-committee-designation">'+esc(d)+'</span>';g.appendChild(c)})}).catch(()=>{})}document.addEventListener('DOMContentLoaded',()=>{load();setTimeout(load,1200)});window.addEventListener('aspi:language-changed',load)})();
+</script>
+JS;
+$html = preg_replace('/<img :src="assetUrl\(data\.site\.logo\) \|\| \'assets\/images\/ASPI-Logo\.png\'"([^>]*alt="Logo"[^>]*)>/','<img src="assets/images/ASPI-Logo.png" $1>', $html, 1);
+$html = str_replace('<!-- TEACHERS -->', $committeeSection."\n\n        <!-- TEACHERS -->", $html);
+$html = str_replace('</head>', $runtimeCss."\n</head>", $html);
+$html = str_replace('</body>', $runtimeJs."\n</body>", $html);
+header('Content-Type: text/html; charset=utf-8');echo $html;
