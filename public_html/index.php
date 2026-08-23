@@ -8,41 +8,70 @@ if ($html === false) {
     exit('Homepage template unavailable');
 }
 
-/*
- * Keep the existing homepage and its existing ASPI logo. Do not inject a
- * second/fake splash logo. Alpine.data providers must be referenced by name
- * so the splash screen can initialize and disappear normally.
- */
+/* Use the existing ASPI SVG logo already present in the repository. */
+$html = str_replace('assets/images/ASPI-Logo.png', 'assets/images/ASPI-Logo.svg', $html);
+
+/* Alpine.data providers must be referenced by name. */
 $html = str_replace('x-data="frontendApp()"', 'x-data="frontendApp"', $html);
 
-/* Use the existing ASPI logo asset in the original splash without adding a
- * new frame/background around it. */
+/* Keep the existing logo; remove only the unnecessary frame around the splash logo. */
 $html = str_replace(
     'class="w-full h-full object-contain rounded-full bg-white/10 p-2 border-2 border-brand-gold/50 shadow-xl animate-float"',
     'class="w-full h-full object-contain animate-float"',
     $html
 );
 
-/* Keep the existing theme controls but correct their colours by mode. */
-$critical = <<<'HTML'
-<style id="aspi-home-runtime-fix">
-:root{--aspi-blue:#094f9d;--aspi-gold:#facc15}
-html:not(.dark) .header-control,html:not(.dark) .header-control i{color:var(--aspi-blue)!important;border-color:#094f9d55!important}
-.dark .header-control,.dark .header-control i{color:var(--aspi-gold)!important;border-color:#facc1555!important}
-html:not(.dark) .founder-highlight{background:linear-gradient(135deg,#fff,#eef5ff)!important;color:#172033!important;border-color:#dbe7f5!important}
-html:not(.dark) .founder-highlight .founder-cta{background:linear-gradient(135deg,#094f9d,#1767bf)!important;color:#fff!important}
-html:not(.dark) .glass-nav{background:rgba(255,255,255,.96)!important;border-color:#dbe7f5!important}
-html:not(.dark) .glass-card{background:rgba(255,255,255,.96)!important;border-color:#dbe7f5!important}
+/* Replace the old globe + language-name control with a compact BN/EN switch.
+   Bengali mode shows EN; English mode shows বাং. */
+$oldDesktopLang = '<div class="lang-switch" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\')">\n                    <i class="fa-solid fa-globe"></i>\n                    <span class="lang-label" x-text="currentLang === \'bn\' ? \'বাংলা\' : \'English\'"></span>\n                </div>';
+$newDesktopLang = '<button type="button" class="lang-switch aspi-lang-toggle" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\')" :aria-label="currentLang === \'bn\' ? \'Switch to English\' : \'বাংলায় পরিবর্তন করুন\'">\n                    <span class="aspi-lang-bn" :class="currentLang === \'bn\' ? \'active\' : \'\'">বাং</span><span class="aspi-lang-divider">/</span><span class="aspi-lang-en" :class="currentLang === \'en\' ? \'active\' : \'\'">EN</span>\n                </button>';
+$html = str_replace($oldDesktopLang, $newDesktopLang, $html);
+
+$oldMobileLang = '<button @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\'); mobileMenuOpen = false" class="mobile-lang-btn text-center text-white">\n                <i class="fa-solid fa-globe"></i>\n                <span x-text="currentLang === \'bn\' ? \'বাংলা → English\' : \'English → বাংলা\'"></span>\n            </button>';
+$newMobileLang = '<button type="button" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\'); mobileMenuOpen = false" class="mobile-lang-btn aspi-lang-toggle">\n                <span class="aspi-lang-bn" :class="currentLang === \'bn\' ? \'active\' : \'\'">বাং</span><span>/</span><span class="aspi-lang-en" :class="currentLang === \'en\' ? \'active\' : \'\'">EN</span>\n            </button>';
+$html = str_replace($oldMobileLang, $newMobileLang, $html);
+
+$runtime = <<<'HTML'
+<style id="aspi-home-production-fix">
+/* Light mode must actually be light across the whole page. */
+html:not(.dark),html:not(.dark) body{background:#f8fbff!important;color:#172033!important}
+html:not(.dark) .bg-gradient-anim{background:linear-gradient(135deg,#f8fbff 0%,#e8f1fa 100%)!important}
+html.dark,html.dark body{background:#050b16!important}
+
+/* Existing ASPI logo: SVG is the repository's real logo asset. */
+.aspi-logo-img{display:block!important;visibility:visible!important;opacity:1!important}
+
+/* Compact Bengali/English switcher. In Bangla it visibly offers EN. */
+.aspi-lang-toggle{display:inline-flex!important;align-items:center;justify-content:center;gap:.28rem;min-width:64px!important;height:40px;padding:.35rem .65rem!important;border-radius:9999px!important;font-weight:900!important;letter-spacing:.02em;cursor:pointer;transition:.2s ease}
+.aspi-lang-toggle .aspi-lang-bn,.aspi-lang-toggle .aspi-lang-en{opacity:.55;transition:.2s ease}
+.aspi-lang-toggle .aspi-lang-bn.active,.aspi-lang-toggle .aspi-lang-en.active{opacity:1}
+.aspi-lang-toggle .aspi-lang-divider{opacity:.35}
+html:not(.dark) .aspi-lang-toggle{background:#fff!important;color:#172033!important;border:1px solid #d7e2ee!important;box-shadow:0 6px 18px rgba(15,23,42,.08)!important}
+html.dark .aspi-lang-toggle{background:#0f1b2e!important;color:#fff!important;border:1px solid rgba(250,204,21,.35)!important}
+
+/* Theme controls: blue in light mode, gold in dark mode. */
+html:not(.dark) .header-control,html:not(.dark) .header-control i{color:#094f9d!important;border-color:#094f9d55!important}
+html.dark .header-control,html.dark .header-control i{color:#facc15!important;border-color:#facc1555!important}
 html:not(.dark) .mobile-menu{background:#fff!important;border-color:#dbe7f5!important}
 html:not(.dark) .mobile-menu a{color:#172033!important}
-html:not(.dark) .bg-gradient-anim{background:linear-gradient(135deg,#f8fbff,#e8f1fa)!important}
 </style>
+<script>
+/* Last-resort logo recovery if a configured/custom logo URL is broken. */
+document.addEventListener('error', function(e){
+    var img=e.target;
+    if(img && img.tagName==='IMG' && img.classList.contains('aspi-logo-img')) img.src='assets/images/ASPI-Logo.svg';
+}, true);
+</script>
 HTML;
 
+/* Mark all homepage logo images so the fallback above applies. */
+$html = str_replace('<img :src="assetUrl(data.site.logo)', '<img class="aspi-logo-img" :src="assetUrl(data.site.logo)', $html);
+$html = str_replace('<img :src="(data.site.logo)', '<img class="aspi-logo-img" :src="(data.site.logo)', $html);
+
 if (stripos($html, '</head>') !== false) {
-    $html = str_ireplace('</head>', $critical . '</head>', $html, $headCount);
+    $html = str_ireplace('</head>', $runtime . '</head>', $html, $headCount);
 } else {
-    $html = $critical . $html;
+    $html = $runtime . $html;
 }
 
 header('Content-Type: text/html; charset=utf-8');
