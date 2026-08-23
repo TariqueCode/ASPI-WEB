@@ -1,17 +1,19 @@
 Options -Indexes
 DirectoryIndex index.php index.html
 
-# Dashboard entry/authentication endpoints.
-<FilesMatch "^(index\.php|index\.html|login\.php|logout\.php|auth\.php)$">
+# Never expose the raw dashboard template; /admin/ must go through index.php -> auth.php.
+<Files "index.html">
+    Require all denied
+</Files>
+
+<FilesMatch "^(index\.php|login\.php|logout\.php|auth\.php)$">
     Require all granted
 </FilesMatch>
 
-# Admin action endpoints are called by the dashboard via fetch().
 <FilesMatch "^actions/.*\.php$">
     Require all granted
 </FilesMatch>
 
-# Deny any other PHP/PHTML file in /admin.
-<FilesMatch "^(?!index\.php$|index\.html$|login\.php$|logout\.php$|auth\.php$|actions/).*\.phtml?$">
+<FilesMatch "^(?!index\.php$|login\.php$|logout\.php$|auth\.php$|actions/).*\.phtml?$">
     Require all denied
 </FilesMatch>
