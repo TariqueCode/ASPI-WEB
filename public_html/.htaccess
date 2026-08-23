@@ -2,14 +2,19 @@ Options -Indexes
 DirectoryIndex index.php index.html
 ErrorDocument 404 /404.php
 
+RewriteEngine On
+# Route the dashboard's legacy upload request through the authenticated uploader.
+RewriteCond %{QUERY_STRING} (^|&)action=upload(&|$) [NC]
+RewriteRule ^api\.php$ upload.php [END,QSA]
+
 <FilesMatch "\.(env|ini|log|sql|md|yml|yaml|backup)$">
     Require all denied
 </FilesMatch>
 
-<FilesMatch "^(index\.php|index\.html|api\.php|config\.php|session\.php|committee\.php|founder\.php|404\.php)$">
+<FilesMatch "^(index\.php|index\.html|api\.php|upload\.php|config\.php|session\.php|committee\.php|founder\.php|404\.php)$">
     Require all granted
 </FilesMatch>
 
-<FilesMatch "^(?!index\.php$|index\.html$|api\.php$|config\.php$|session\.php$|committee\.php$|founder\.php$|404\.php$).*\.phtml?$">
+<FilesMatch "^(?!index\.php$|index\.html$|api\.php$|upload\.php$|config\.php$|session\.php$|committee\.php$|founder\.php$|404\.php$).*\.phtml?$">
     Require all denied
 </FilesMatch>
