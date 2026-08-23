@@ -1,14 +1,20 @@
 <?php
+declare(strict_types=1);
+
 if (session_status() === PHP_SESSION_NONE) {
+    $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+
+    session_name('ASPISESSID');
     session_set_cookie_params([
         'lifetime' => 60 * 60 * 24 * 7,
         'path' => '/',
-        'domain' => $_SERVER['HTTP_HOST'] ?? '',
-        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+        'secure' => $secure,
         'httponly' => true,
-        'samesite' => 'Strict'
+        'samesite' => 'Lax'
     ]);
+
     session_start();
+
     if (!isset($_SESSION['initiated'])) {
         session_regenerate_id(true);
         $_SESSION['initiated'] = true;
