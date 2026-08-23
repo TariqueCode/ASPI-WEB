@@ -38,9 +38,6 @@ html:not(.dark),html:not(.dark) body{background:#f8fbff!important;color:#172033!
 html:not(.dark) .bg-gradient-anim{background:linear-gradient(135deg,#f8fbff 0%,#e8f1fa 100%)!important}
 html.dark,html.dark body{background:#050b16!important}
 
-/* Existing ASPI logo: SVG is the repository's real logo asset. */
-.aspi-logo-img{display:block!important;visibility:visible!important;opacity:1!important}
-
 /* Compact Bengali/English switcher. In Bangla it visibly offers EN. */
 .aspi-lang-toggle{display:inline-flex!important;align-items:center;justify-content:center;gap:.28rem;min-width:64px!important;height:40px;padding:.35rem .65rem!important;border-radius:9999px!important;font-weight:900!important;letter-spacing:.02em;cursor:pointer;transition:.2s ease}
 .aspi-lang-toggle .aspi-lang-bn,.aspi-lang-toggle .aspi-lang-en{opacity:.55;transition:.2s ease}
@@ -55,18 +52,7 @@ html.dark .header-control,html.dark .header-control i{color:#facc15!important;bo
 html:not(.dark) .mobile-menu{background:#fff!important;border-color:#dbe7f5!important}
 html:not(.dark) .mobile-menu a{color:#172033!important}
 </style>
-<script>
-/* Last-resort logo recovery if a configured/custom logo URL is broken. */
-document.addEventListener('error', function(e){
-    var img=e.target;
-    if(img && img.tagName==='IMG' && img.classList.contains('aspi-logo-img')) img.src='assets/images/ASPI-Logo.svg';
-}, true);
-</script>
 HTML;
-
-/* Mark all homepage logo images so the fallback above applies. */
-$html = str_replace('<img :src="assetUrl(data.site.logo)', '<img class="aspi-logo-img" :src="assetUrl(data.site.logo)', $html);
-$html = str_replace('<img :src="(data.site.logo)', '<img class="aspi-logo-img" :src="(data.site.logo)', $html);
 
 if (stripos($html, '</head>') !== false) {
     $html = str_ireplace('</head>', $runtime . '</head>', $html, $headCount);
