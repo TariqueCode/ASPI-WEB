@@ -23,12 +23,22 @@ $html = str_replace(
 
 /* Replace the old globe + language-name control with a compact BN/EN switch.
    Bengali mode shows EN; English mode shows বাং. */
-$oldDesktopLang = '<div class="lang-switch" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\')">\n                    <i class="fa-solid fa-globe"></i>\n                    <span class="lang-label" x-text="currentLang === \'bn\' ? \'বাংলা\' : \'English\'"></span>\n                </div>';
-$newDesktopLang = '<button type="button" class="lang-switch aspi-lang-toggle" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\')" :aria-label="currentLang === \'bn\' ? \'Switch to English\' : \'বাংলায় পরিবর্তন করুন\'">\n                    <span class="aspi-lang-bn" :class="currentLang === \'bn\' ? \'active\' : \'\'">বাং</span><span class="aspi-lang-divider">/</span><span class="aspi-lang-en" :class="currentLang === \'en\' ? \'active\' : \'\'">EN</span>\n                </button>';
+$oldDesktopLang = '<div class="lang-switch" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')">
+                    <i class="fa-solid fa-globe"></i>
+                    <span class="lang-label" x-text="currentLang === 'bn' ? 'বাংলা' : 'English'"></span>
+                </div>';
+$newDesktopLang = '<button type="button" class="lang-switch aspi-lang-toggle" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')" :aria-label="currentLang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'">
+                    <span class="aspi-lang-bn" :class="currentLang === 'bn' ? 'active' : ''">বাং</span><span class="aspi-lang-divider">/</span><span class="aspi-lang-en" :class="currentLang === 'en' ? 'active' : ''">EN</span>
+                </button>';
 $html = str_replace($oldDesktopLang, $newDesktopLang, $html);
 
-$oldMobileLang = '<button @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\'); mobileMenuOpen = false" class="mobile-lang-btn text-center text-white">\n                <i class="fa-solid fa-globe"></i>\n                <span x-text="currentLang === \'bn\' ? \'বাংলা → English\' : \'English → বাংলা\'"></span>\n            </button>';
-$newMobileLang = '<button type="button" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\'); mobileMenuOpen = false" class="mobile-lang-btn aspi-lang-toggle">\n                <span class="aspi-lang-bn" :class="currentLang === \'bn\' ? \'active\' : \'\'">বাং</span><span>/</span><span class="aspi-lang-en" :class="currentLang === \'en\' ? \'active\' : \'\'">EN</span>\n            </button>';
+$oldMobileLang = '<button @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn'); mobileMenuOpen = false" class="mobile-lang-btn text-center text-white">
+                <i class="fa-solid fa-globe"></i>
+                <span x-text="currentLang === 'bn' ? 'বাংলা → English' : 'English → বাংলা'"></span>
+            </button>';
+$newMobileLang = '<button type="button" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn'); mobileMenuOpen = false" class="mobile-lang-btn aspi-lang-toggle">
+                <span class="aspi-lang-bn" :class="currentLang === 'bn' ? 'active' : ''">বাং</span><span>/</span><span class="aspi-lang-en" :class="currentLang === 'en' ? 'active' : ''">EN</span>
+            </button>';
 $html = str_replace($oldMobileLang, $newMobileLang, $html);
 
 $runtime = <<<'HTML'
@@ -51,6 +61,24 @@ html:not(.dark) .header-control,html:not(.dark) .header-control i{color:#094f9d!
 html.dark .header-control,html.dark .header-control i{color:#facc15!important;border-color:#facc1555!important}
 html:not(.dark) .mobile-menu{background:#fff!important;border-color:#dbe7f5!important}
 html:not(.dark) .mobile-menu a{color:#172033!important}
+
+/* Gallery page: keep the same dark visual surface as its cards/header.
+   The gallery route previously inherited a white section background. */
+body:has(.gallery-card){background:#08111f!important;color:#e6f4fb!important}
+body:has(.gallery-card) .bg-gradient-anim{background:linear-gradient(135deg,#050b16 0%,#08111f 55%,#0b1726 100%)!important}
+body:has(.gallery-card) main,
+body:has(.gallery-card) main>section,
+body:has(.gallery-card) main>div,
+body:has(.gallery-card) .min-h-screen{background:transparent!important}
+body:has(.gallery-card) footer{background:#08111f!important;color:#9fb2c1!important;border-color:rgba(148,163,184,.14)!important}
+body:has(.gallery-card) .gallery-card{background:#0f2633!important;border:1px solid rgba(96,165,250,.18)!important;box-shadow:0 12px 30px rgba(0,0,0,.22)!important}
+body:has(.gallery-card) .gallery-card .text-slate-900,
+body:has(.gallery-card) .gallery-card .text-gray-900{color:#effcff!important}
+body:has(.gallery-card) .gallery-card .text-slate-500,
+body:has(.gallery-card) .gallery-card .text-slate-600{color:#8ea8b7!important}
+@media(max-width:640px){
+  body:has(.gallery-card) main{background:transparent!important}
+}
 </style>
 HTML;
 
