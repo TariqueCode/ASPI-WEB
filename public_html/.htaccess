@@ -20,3 +20,43 @@ RewriteRule ^api\.php$ upload.php [END,QSA]
 <FilesMatch "^(?!index\.php$|api\.php$|upload\.php$|config\.php$|session\.php$|committee\.php$|founder\.php$|404\.php$).*\.phtml?$">
     Require all denied
 </FilesMatch>
+
+# ------------------------------------------------------------
+# Production performance: compress text and cache immutable assets
+# ------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain text/html text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/json application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/gif "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType font/ttf "access plus 30 days"
+    ExpiresByType font/woff "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 30 days"
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|svg|jpg|jpeg|png|gif|webp|woff|woff2|ttf)$">
+        Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+    </FilesMatch>
+    <FilesMatch "\.(php|html)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>
+
+# Uploaded assets are static and should never execute as PHP.
+<DirectoryMatch "/assets/uploads/">
+    <FilesMatch "\.(php|phtml|php[0-9]*)$">
+        Require all denied
+    </FilesMatch>
+</DirectoryMatch>
