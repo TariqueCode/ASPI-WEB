@@ -24,6 +24,90 @@ $lang = in_array($lang, ['bn','en'], true) ? $lang : 'bn';
 $suffix = ($lang === 'en') ? '_en' : '_bn';
 $msg = static fn(string $bn, string $en): string => $lang === 'en' ? $en : $bn;
 
+/**
+ * Upload lifecycle guard: physical uploads are deleted only when no database
+ * record references them anymore.
+ */
+function normalizeUploadPath(?string $value): ?string {
+    if (!$value) return null;
+    $value = trim(str_replace('\\', '/', $value));
+    $marker = 'assets/uploads/';
+    $pos = stripos($value, $marker);
+    if ($pos === false) return null;
+    $relative = substr($value, $pos);
+    if ($relative === '' || str_contains($relative, '..')) return null;
+    return $relative;
+}
+function uploadAbsolutePath(?string $value): ?string {
+    $relative = normalizeUploadPath($value);
+    return $relative ? __DIR__ . '/' . $relative : null;
+}
+function deleteUnreferencedUploads(PDO $pdo, array $candidates): int {
+    $candidateSet = [];
+    foreach ($candidates as $candidate) {
+        $relative = normalizeUploadPath($candidate);
+        if ($relative) $candidateSet[$relative] = true;
+    }
+    if (!$candidateSet) return 0;
+
+    $referenced = [];
+    $sources = [
+        ['messages','image_url'], ['notices','file_url'], ['events','file_url'],
+        ['teachers','file_url'], ['quotes','image_url'], ['social_links','icon_image'],
+        ['admissions','photo_path'], ['gallery_items','file_url'],
+        ['gallery_items','thumbnail'], ['gallery_attachments','file_url'],
+        ['event_media','file_url'], ['content','content_value']
+    ];
+    foreach ($sources as [$table,$column]) {
+        try {
+            $stmt = $pdo->query("SELECT $column FROM $table WHERE $column IS NOT NULL AND $column <> ''");
+            foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $value) {
+                if (is_string($value)) {
+                    $relative = normalizeUploadPath($value);
+                    if ($relative) $referenced[$relative] = true;
+                }
+            }
+        } catch (Throwable $e) {}
+    }
+    try {
+        foreach ($pdo->query("SELECT setting_value, setting_json FROM settings")->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            foreach ([$row['setting_value'] ?? '', $row['setting_json'] ?? ''] as $value) {
+                if (!is_string($value) || !str_contains($value, 'assets/uploads/')) continue;
+                preg_match_all('~assets/uploads/[A-Za-z0-9_./-]+~', $value, $matches);
+                foreach ($matches[0] ?? [] as $path) {
+                    $relative = normalizeUploadPath($path);
+                    if ($relative) $referenced[$relative] = true;
+                }
+            }
+        }
+    } catch (Throwable $e) {}
+
+    $deleted = 0;
+    foreach (array_keys($candidateSet) as $relative) {
+        if (isset($referenced[$relative])) continue;
+        $absolute = uploadAbsolutePath($relative);
+        if ($absolute && is_file($absolute) && @unlink($absolute)) $deleted++;
+    }
+    return $deleted;
+}
+function cleanupOrphanUploads(PDO $pdo): int {
+    $roots = [__DIR__ . '/assets/uploads', __DIR__ . '/assets/uploads/fonts'];
+    $files = [];
+    foreach ($roots as $root) {
+        if (!is_dir($root)) continue;
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $path = str_replace('\\', '/', $file->getPathname());
+                $marker = '/assets/uploads/';
+                $pos = strpos($path, $marker);
+                if ($pos !== false) $files[] = substr($path, $pos + 1);
+            }
+        }
+    }
+    return deleteUnreferencedUploads($pdo, $files);
+}
+
 // ============================================================
 // ১. ফাইল আপলোড
 // ============================================================
@@ -945,12 +1029,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && empty($action)) {
     
     // Gallery items with count
     $galleryWhere = $isAdminRequest ? '' : ' WHERE status = 1';
-    $galleryItems = $pdo->query("SELECT id, title_bn, title_en, title$suffix as title, file_url, thumbnail, status, sort_order FROM gallery_items" . $galleryWhere . " ORDER BY sort_order ASC, id ASC")->fetchAll();
-    foreach ($galleryItems as &$item) {
-        $stmt2 = $pdo->prepare("SELECT COUNT(*) FROM gallery_attachments WHERE gallery_id = ?");
-        $stmt2->execute([$item['id']]);
-        $item['attachments_count'] = (int)$stmt2->fetchColumn();
-    }
+    $galleryItems = $pdo->query("SELECT gi.id, gi.title_bn, gi.title_en, gi.title$suffix as title, gi.file_url, gi.thumbnail, gi.status, gi.sort_order,
+        COUNT(ga.id) AS attachments_count
+        FROM gallery_items gi
+        LEFT JOIN gallery_attachments ga ON ga.gallery_id = gi.id" .
+        ($isAdminRequest ? "" : " WHERE gi.status = 1") .
+        " GROUP BY gi.id, gi.title_bn, gi.title$suffix, gi.title_en, gi.file_url, gi.thumbnail, gi.status, gi.sort_order
+        ORDER BY gi.sort_order ASC, gi.id ASC")->fetchAll();
     $response['gallery'] = $galleryItems;
     
     // Content
@@ -989,6 +1074,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($action)) {
         $idRows = $pdo->query("SELECT id FROM {$table}")->fetchAll(PDO::FETCH_COLUMN);
         foreach ($idRows as $id) $existingIds[(int)$id] = true;
         $keepIds = [];
+        $fileColumns = [
+            'messages' => ['image_url'], 'notices' => ['file_url'], 'events' => ['file_url'],
+            'teachers' => ['file_url'], 'quotes' => ['image_url'], 'social_links' => ['icon_image']
+        ];
+        $candidateFiles = [];
+        if (isset($fileColumns[$table])) {
+            foreach ($pdo->query("SELECT " . implode(',', $fileColumns[$table]) . " FROM {$table}")->fetchAll(PDO::FETCH_ASSOC) as $oldRow) {
+                foreach ($fileColumns[$table] as $column) if (!empty($oldRow[$column])) $candidateFiles[] = $oldRow[$column];
+            }
+        }
 
         foreach ($rows as $row) {
             $id = isset($row['id']) && is_numeric($row['id']) ? (int)$row['id'] : 0;
@@ -1024,9 +1119,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($action)) {
             }
             $pdo->prepare("DELETE FROM {$table} WHERE id NOT IN ({$placeholders})")->execute($keepIds);
         } else {
-            if ($table === 'events') $pdo->exec("DELETE FROM event_media");
+            if ($table === 'events') {
+                $oldMedia = $pdo->query("SELECT file_url FROM event_media")->fetchAll(PDO::FETCH_COLUMN);
+                $candidateFiles = array_merge($candidateFiles, $oldMedia);
+                $pdo->exec("DELETE FROM event_media");
+            }
             $pdo->exec("DELETE FROM {$table}");
         }
+        if ($candidateFiles) deleteUnreferencedUploads($pdo, $candidateFiles);
     };
 
     try {
@@ -1064,7 +1164,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($action)) {
             foreach($input['content'] as $key=>$value) $stmt->execute([$key,$value]);
         }
         if (isset($input['gallery']) && is_array($input['gallery'])) {
-            $existing=$pdo->query("SELECT id FROM gallery_items")->fetchAll(PDO::FETCH_COLUMN); $keep=[];
+            $existingRows=$pdo->query("SELECT id,file_url,thumbnail FROM gallery_items")->fetchAll(PDO::FETCH_ASSOC);
+            $existing=array_column($existingRows,'id'); $keep=[];
+            $candidateFiles=[];
+            foreach($existingRows as $old) { foreach(['file_url','thumbnail'] as $col) if(!empty($old[$col])) $candidateFiles[]=$old[$col]; }
+            $oldAttachments=$pdo->query("SELECT gallery_id,file_url FROM gallery_attachments")->fetchAll(PDO::FETCH_ASSOC);
+            foreach($oldAttachments as $old) if(!empty($old['file_url'])) $candidateFiles[]=$old['file_url'];
             foreach($input['gallery'] as $g){
                 $id=(isset($g['id'])&&is_numeric($g['id']))?(int)$g['id']:0;
                 if($id>0 && in_array($id,array_map('intval',$existing),true)){
@@ -1074,7 +1179,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($action)) {
                     $stmt->execute([$g['title_bn']??'',$g['title_en']??'',$g['file_url'],$g['thumbnail']??$g['file_url'],$g['status']??1,$g['sort_order']??0]); $keep[]=(int)$pdo->lastInsertId();
                 }
             }
-            if($keep){$ph=implode(',',array_fill(0,count($keep),'?'));$pdo->prepare("DELETE FROM gallery_items WHERE id NOT IN ({$ph})")->execute($keep);}
+            if($keep){
+                $ph=implode(',',array_fill(0,count($keep),'?'));
+                $deletedGalleryIds=$pdo->prepare("SELECT id FROM gallery_items WHERE id NOT IN ({$ph})");
+                $deletedGalleryIds->execute($keep);
+                $deletedGalleryIds=array_map('intval',$deletedGalleryIds->fetchAll(PDO::FETCH_COLUMN));
+                if($deletedGalleryIds){
+                    $dph=implode(',',array_fill(0,count($deletedGalleryIds),'?'));
+                    $pdo->prepare("DELETE FROM gallery_attachments WHERE gallery_id IN ({$dph})")->execute($deletedGalleryIds);
+                }
+                $pdo->prepare("DELETE FROM gallery_items WHERE id NOT IN ({$ph})")->execute($keep);
+            } else {
+                $pdo->exec("DELETE FROM gallery_attachments");
+                $pdo->exec("DELETE FROM gallery_items");
+            }
+            if($candidateFiles) deleteUnreferencedUploads($pdo,$candidateFiles);
         }
 
         $pdo->commit();
