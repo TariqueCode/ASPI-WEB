@@ -23,21 +23,21 @@ $html = str_replace(
 
 /* Replace the old globe + language-name control with a compact BN/EN switch.
    Bengali mode shows EN; English mode shows বাং. */
-$oldDesktopLang = '<div class="lang-switch" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')">
+$oldDesktopLang = '<div class="lang-switch" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\')">
                     <i class="fa-solid fa-globe"></i>
-                    <span class="lang-label" x-text="currentLang === 'bn' ? 'বাংলা' : 'English'"></span>
+                    <span class="lang-label" x-text="currentLang === \'bn\' ? \'বাংলা\' : \'English\'"></span>
                 </div>';
-$newDesktopLang = '<button type="button" class="lang-switch aspi-lang-toggle" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')" :aria-label="currentLang === 'bn' ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'">
-                    <span class="aspi-lang-bn" :class="currentLang === 'bn' ? 'active' : ''">বাং</span><span class="aspi-lang-divider">/</span><span class="aspi-lang-en" :class="currentLang === 'en' ? 'active' : ''">EN</span>
+$newDesktopLang = '<button type="button" class="lang-switch aspi-lang-toggle" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\')" :aria-label="currentLang === \'bn\' ? \'Switch to English\' : \'বাংলায় পরিবর্তন করুন\'">
+                    <span class="aspi-lang-bn" :class="currentLang === \'bn\' ? \'active\' : \'\'">বাং</span><span class="aspi-lang-divider">/</span><span class="aspi-lang-en" :class="currentLang === \'en\' ? \'active\' : \'\'">EN</span>
                 </button>';
 $html = str_replace($oldDesktopLang, $newDesktopLang, $html);
 
-$oldMobileLang = '<button @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn'); mobileMenuOpen = false" class="mobile-lang-btn text-center text-white">
+$oldMobileLang = '<button @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\'); mobileMenuOpen = false" class="mobile-lang-btn text-center text-white">
                 <i class="fa-solid fa-globe"></i>
-                <span x-text="currentLang === 'bn' ? 'বাংলা → English' : 'English → বাংলা'"></span>
+                <span x-text="currentLang === \'bn\' ? \'বাংলা → English\' : \'English → বাংলা\'"></span>
             </button>';
-$newMobileLang = '<button type="button" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn'); mobileMenuOpen = false" class="mobile-lang-btn aspi-lang-toggle">
-                <span class="aspi-lang-bn" :class="currentLang === 'bn' ? 'active' : ''">বাং</span><span>/</span><span class="aspi-lang-en" :class="currentLang === 'en' ? 'active' : ''">EN</span>
+$newMobileLang = '<button type="button" @click="switchLanguage(currentLang === \'bn\' ? \'en\' : \'bn\'); mobileMenuOpen = false" class="mobile-lang-btn aspi-lang-toggle">
+                <span class="aspi-lang-bn" :class="currentLang === \'bn\' ? \'active\' : \'\'">বাং</span><span>/</span><span class="aspi-lang-en" :class="currentLang === \'en\' ? \'active\' : \'\'">EN</span>
             </button>';
 $html = str_replace($oldMobileLang, $newMobileLang, $html);
 
