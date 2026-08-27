@@ -1214,7 +1214,7 @@ header nav button:hover::before{
 
                 async loadTranslations(lang) {
                     try {
-                        const res = await fetch(`/languages/${lang}.json?t=${Date.now()}`);
+                        const res = await fetch(`/languages/${lang}.json`);
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         this.translations = await res.json();
                     } catch (e) {
@@ -1294,7 +1294,7 @@ header nav button:hover::before{
                 async fetchData() {
                     try {
                         const lang = this.currentLang || 'bn';
-                        const res = await fetch(`api.php?lang=${lang}&t=${Date.now()}`, { cache: 'no-store' });
+                        const res = await fetch(`api.php?lang=${lang}`);
                         const json = await res.json();
                         if (!json.error) {
                             this.data = json;
@@ -1310,7 +1310,7 @@ header nav button:hover::before{
 
                 async fetchGallery() {
                     try {
-                        const res = await fetch(`api.php?action=get_gallery_items&t=${Date.now()}`);
+                        const res = await fetch('api.php?action=get_gallery_items');
                         const json = await res.json();
                         if (json.gallery) this.galleryItems = json.gallery;
                     } catch (e) { console.error('Gallery load error', e); }
@@ -1318,7 +1318,7 @@ header nav button:hover::before{
 
                 async fetchSocialLinks() {
                     try {
-                        const res = await fetch('api.php?action=get_social_links&t=' + Date.now());
+                        const res = await fetch('api.php?action=get_social_links');
                         const json = await res.json();
                         if (json.social_links) this.socialLinks = json.social_links;
                     } catch (e) { console.error('Social links load error', e); }
@@ -1328,7 +1328,7 @@ header nav button:hover::before{
                 async openGalleryPopup(item) {
                     this.isLoading = true;
                     try {
-                        const res = await fetch(`api.php?action=get_gallery_attachments&id=${item.id}&t=${Date.now()}`);
+                        const res = await fetch(`api.php?action=get_gallery_attachments&id=${item.id}`);
                         const json = await res.json();
                         if (json.attachments) {
                             this.popupAttachments = json.attachments;
