@@ -132,6 +132,50 @@
             background: rgba(255,255,255,0.1);
         }
 
+        /* Professional portal navigation */
+        .aspi-nav-separator {
+            display:inline-block;
+            width:1px;
+            height:34px;
+            margin:0 8px 0 6px;
+            background:linear-gradient(to bottom, transparent, rgba(34,211,238,.55), transparent);
+        }
+        .aspi-portal-btn {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:.5rem;
+            min-width:108px;
+            height:40px;
+            padding:.55rem 1rem;
+            border-radius:14px;
+            font-weight:900;
+            font-size:.86rem;
+            color:#67e8f9;
+            background:rgba(8,47,73,.28);
+            border:1px solid rgba(34,211,238,.24);
+            box-shadow:0 8px 24px rgba(0,0,0,.14);
+            transition:all .22s ease;
+        }
+        .aspi-portal-btn:hover { transform:translateY(-1px); border-color:rgba(34,211,238,.55); background:rgba(8,47,73,.48); box-shadow:0 10px 28px rgba(34,211,238,.12); }
+        .aspi-mobile-portal-wrap {
+            display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+            margin:10px auto 2px; padding-top:14px; width:min(100%,360px);
+        }
+        .aspi-mobile-portal-line {
+            display:block; width:82%; height:1px;
+            background:linear-gradient(90deg,transparent,rgba(34,211,238,.48),transparent);
+        }
+        .aspi-mobile-portal-btn {
+            width:min(78%,280px); min-height:48px; display:flex; align-items:center; justify-content:center; gap:.6rem;
+            border-radius:15px; font-weight:900; color:#67e8f9; background:rgba(8,47,73,.42);
+            border:1px solid rgba(34,211,238,.28); box-shadow:0 8px 24px rgba(0,0,0,.16);
+        }
+        html:not(.dark) .aspi-portal-btn, html:not(.dark) .aspi-mobile-portal-btn {
+            color:#075985; background:#effaff; border-color:rgba(14,116,144,.24);
+        }
+        header .social-links, header [data-social-links], header .social-icons { display:none!important; }
+
         /* Apply Now বাটন হাইলাইট */
         .btn-apply {
             background: linear-gradient(135deg, #facc15, #f59e0b);
@@ -522,12 +566,23 @@ header nav button:hover::before{
                 <a href="#gallery_section" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('gallery_reports')"></a>
                 <a href="#events_section" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('events_news')"></a>
                 <a href="founder.php" class="px-4 py-2 font-bold hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-all text-sm" x-text="t('founder_profile')"></a>
+                <!-- Portal: visually separated from the main navigation -->
+                <span class="aspi-nav-separator" aria-hidden="true"></span>
+                <a href="admin/" class="aspi-portal-btn" x-show="portalLoggedIn" x-cloak>
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span x-text="currentLang === 'bn' ? 'পোর্টাল' : 'Portal'"></span>
+                </a>
+                <a href="admin/login.php" class="aspi-portal-btn" x-show="!portalLoggedIn && !portalLoading" x-cloak>
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span x-text="currentLang === 'bn' ? 'লগইন' : 'Login'"></span>
+                </a>
+
                 <!-- Dark/Light -->
                 <button @click="toggleTheme()" class="aspi-theme-toggle header-control hover:scale-105 transition-transform" aria-label="Theme">
                     <i class="fa-solid" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
                 </button>
                 <!-- Language Switcher (Desktop) -->
-                <div class="lang-switch" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')">
+                <button type="button" class="lang-switch" @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn')">
                     <i class="fa-solid fa-globe"></i>
                     <span class="lang-label" x-text="currentLang === 'bn' ? 'বাংলা' : 'English'"></span>
                 </div>
@@ -553,10 +608,22 @@ header nav button:hover::before{
             <a href="#gallery_section" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('gallery_reports')"></a>
             <a href="#events_section" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('events_news')"></a>
             <a href="founder.php" @click="mobileMenuOpen = false" class="block px-4 py-3 bg-slate-800/50 rounded-xl font-bold text-center border border-slate-700" x-text="t('founder_profile')"></a>
+            <!-- Portal belongs only inside the mobile hamburger menu -->
+            <div class="aspi-mobile-portal-wrap">
+                <span class="aspi-mobile-portal-line" aria-hidden="true"></span>
+                <a href="admin/" @click="mobileMenuOpen = false" class="aspi-mobile-portal-btn" x-show="portalLoggedIn" x-cloak>
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span x-text="currentLang === 'bn' ? 'পোর্টাল' : 'Portal'"></span>
+                </a>
+                <a href="admin/login.php" @click="mobileMenuOpen = false" class="aspi-mobile-portal-btn" x-show="!portalLoggedIn && !portalLoading" x-cloak>
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span x-text="currentLang === 'bn' ? 'লগইন' : 'Login'"></span>
+                </a>
+            </div>
+
             <!-- Mobile Language Switcher -->
             <button @click="switchLanguage(currentLang === 'bn' ? 'en' : 'bn'); mobileMenuOpen = false" class="mobile-lang-btn text-center text-white">
-                <i class="fa-solid fa-globe"></i>
-                <span x-text="currentLang === 'bn' ? 'বাংলা → English' : 'English → বাংলা'"></span>
+                <span class="aspi-lang-bn" :class="currentLang === 'bn' ? 'active' : ''">বাং</span><span>/</span><span class="aspi-lang-en" :class="currentLang === 'en' ? 'active' : ''">EN</span>
             </button>
         </div>
     </header>
@@ -1077,7 +1144,10 @@ header nav button:hover::before{
                     <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-none" x-text="t('institution_name_short')"></h3>
                 </div>
                 <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-bold mb-6 sm:mb-8 leading-relaxed" x-text="t('footer_desc')"></p>
-                <div class="flex space-x-3 sm:space-x-4">
+                <div class="text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-cyan-500 dark:text-cyan-300 mb-3">
+                    <span x-text="currentLang === 'bn' ? 'সামাজিক যোগাযোগ' : 'Follow Us'"></span>
+                </div>
+                <div class="flex flex-wrap gap-3 sm:gap-4">
                     <template x-for="link in socialLinks" :key="link.id">
                         <a :href="link.url" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all shadow-md hover:scale-110 text-lg sm:text-xl border border-slate-100 dark:border-slate-700" :style="`background-color: ${link.color}20; color: ${link.color};`">
                             <i :class="link.icon_class || 'fa-solid fa-link'"></i>
@@ -1202,6 +1272,10 @@ header nav button:hover::before{
 
                 // Social links
                 socialLinks: [],
+                // Portal authentication state
+                portalLoggedIn: false,
+                portalUser: null,
+                portalLoading: true,
 
                 // ======================== TRANSLATION ========================
                 t(key) { return this.translations[key] || key; },
@@ -1246,6 +1320,7 @@ header nav button:hover::before{
                     this.fetchData();
                     this.fetchGallery();
                     this.fetchSocialLinks();
+                    this.checkPortalLogin();
 
                     // Splash screen and popup
                     setTimeout(() => {
@@ -1322,6 +1397,24 @@ header nav button:hover::before{
                         const json = await res.json();
                         if (json.social_links) this.socialLinks = json.social_links;
                     } catch (e) { console.error('Social links load error', e); }
+                },
+
+                async checkPortalLogin() {
+                    try {
+                        const res = await fetch('api.php?action=check_login&t=' + Date.now(), {
+                            credentials: 'same-origin',
+                            cache: 'no-store'
+                        });
+                        const json = await res.json();
+                        this.portalLoggedIn = json.logged_in === true;
+                        this.portalUser = json.user || null;
+                    } catch (e) {
+                        console.error('Portal login check error', e);
+                        this.portalLoggedIn = false;
+                        this.portalUser = null;
+                    } finally {
+                        this.portalLoading = false;
+                    }
                 },
 
                 // ======================== GALLERY POPUP ========================
