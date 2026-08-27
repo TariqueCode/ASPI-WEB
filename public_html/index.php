@@ -79,7 +79,49 @@ body:has(.gallery-card) .gallery-card .text-slate-600{color:#8ea8b7!important}
 @media(max-width:640px){
   body:has(.gallery-card) main{background:transparent!important}
 }
+
+
+/* Hard route-level gallery surface fix. The public gallery is a SPA route, so
+   styling only a gallery card is not enough: the surrounding page shell can
+   still paint white in light mode. */
+body.aspi-gallery-route,
+body.aspi-gallery-route #app,
+body.aspi-gallery-route main,
+body.aspi-gallery-route main.container,
+body.aspi-gallery-route main > section,
+body.aspi-gallery-route footer,
+body.aspi-gallery-route .glass-card {
+  background:#08111f!important;
+  color:#e6f4fb!important;
+}
+body.aspi-gallery-route .gallery-card {
+  background:#0f2633!important;
+  border-color:rgba(96,165,250,.22)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.28)!important;
+}
+body.aspi-gallery-route .gallery-card .text-slate-900,
+body.aspi-gallery-route .gallery-card .text-slate-800,
+body.aspi-gallery-route .gallery-card .text-gray-900 { color:#effcff!important; }
+body.aspi-gallery-route .gallery-card .text-slate-500,
+body.aspi-gallery-route .gallery-card .text-slate-600 { color:#8ea8b7!important; }
+body.aspi-gallery-route #gallery_section,
+body.aspi-gallery-route #gallery_section > div { background:transparent!important; }
+body.aspi-gallery-route footer { border-color:rgba(148,163,184,.14)!important; }
+@media(max-width:640px){
+  body.aspi-gallery-route main.container { padding-left:16px!important; padding-right:16px!important; }
+}
 </style>
+<script>
+(function(){
+  function markGalleryRoute(){
+    var path = (window.location.pathname || '').replace(/\\/+$/, '') || '/';
+    var isGallery = path === '/gallery' || path === '/gallery.php' || /\\/gallery$/i.test(path);
+    document.body.classList.toggle('aspi-gallery-route', isGallery);
+  }
+  document.addEventListener('DOMContentLoaded', markGalleryRoute);
+  window.addEventListener('popstate', markGalleryRoute);
+})();
+</script>
 HTML;
 
 if (stripos($html, '</head>') !== false) {
