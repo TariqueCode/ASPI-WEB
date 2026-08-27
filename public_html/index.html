@@ -7,7 +7,9 @@
     <meta name="theme-color" content="#020617">
     <link rel="icon" type="image/png" href="assets/images/ASPI-Logo.png">
     <link rel="apple-touch-icon" href="assets/images/ASPI-Logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style id="aspi-local-font">
+        @font-face{font-family:'Hind Siliguri';src:url('assets/fonts/Hind-Siliguri-Regular.ttf') format('truetype');font-style:normal;font-weight:300 800;font-display:swap;}
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,6 +31,15 @@
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        // Keep non-critical images from blocking first paint.
+        document.addEventListener('DOMContentLoaded',function(){
+            document.querySelectorAll('img').forEach(function(img){
+                if(!img.hasAttribute('loading')) img.loading='lazy';
+                if(!img.hasAttribute('decoding')) img.decoding='async';
+            });
+        });
+    </script>
 
     <style>
         :root { --dynamic-font: 'Hind Siliguri'; }
